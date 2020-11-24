@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #------------------------------------------------------
 # @ File       : brightness.py
-# @ Description:  
+# @ Description:  'https://docs.opencv.org/3.4/d3/dc1/tutorial_basic_linear_transform.html'
 # @ Author     : Alex Chung
 # @ Contact    : yonganzhong@outlook.com
 # @ License    : Copyright (c) 2017-2018
@@ -15,10 +15,12 @@ import seaborn as sns
 import numpy as np
 import cv2 as cv
 import matplotlib.pyplot as plt
+from tools import show_histogram
 
 img_path = './images/demo.jpg'
 
 from enum import Enum
+
 
 class Brightness(Enum):
 
@@ -47,24 +49,6 @@ def brightness(bgr_img, low_threshold=0.1, high_threshold=0.1):
     return flag
 
 
-def tune_contrast_with_lab(bgr_img, alpha=1.0):
-    """
-
-    :param bgr_img:
-    :param factor:
-    :return:
-    """
-    lab_img = cv.cvtColor(bgr_img, cv.COLOR_BGR2Lab)
-    lab_img = lab_img.astype(np.float32)
-    lab_img[:, :, 0] *= alpha
-
-    lab_img = np.clip(lab_img, a_min=0, a_max=255)
-    lab_img = lab_img.astype(np.uint8)
-
-    new_brg_img = cv.cvtColor(lab_img, cv.COLOR_Lab2LBGR)
-
-    return new_brg_img
-
 def tune_brightness_with_lab(bgr_img, beta=0):
     """
 
@@ -83,25 +67,6 @@ def tune_brightness_with_lab(bgr_img, beta=0):
 
     return new_brg_img
 
-
-def tune_saturation_with_hsv(bgr_img, gamma=1.0):
-    """
-
-    :param bgr_img:
-    :param factor:
-    :return:
-    """
-
-    hsv_img = cv.cvtColor(bgr_img, cv.COLOR_BGR2HSV)
-    hsv_img = hsv_img.astype(np.float32)
-    hsv_img[:, :, 1] *= gamma
-
-    hsv_img = np.clip(hsv_img, a_min=0, a_max=255)
-    hsv_img = hsv_img.astype(np.uint8)
-
-    new_brg_img = cv.cvtColor(hsv_img, cv.COLOR_HSV2BGR)
-
-    return new_brg_img
 
 
 def tune_contrast_brightness(image, alpha=1.0, beta=0):
@@ -124,36 +89,6 @@ def tune_contrast_brightness(image, alpha=1.0, beta=0):
 
     return new_image
 
-
-
-def show_histogram(image, title='hist'):
-    """
-
-    :param image:
-    :param channel:
-    :param title:
-    :return:
-    """
-
-    # fig, axs = plt.subplots(2, 2)
-    # # draw histogram
-
-    # plt.hist(image.ravel(), bins=20)
-
-    # display split channel
-    img_channel = cv.split(image)
-    colors = ['b', 'g', 'r']
-    for color, channel in zip(colors, img_channel):
-        sns.distplot(channel.ravel(), bins=10, kde=True, label=color)
-    plt.title('RGB histogram')
-    plt.legend()
-    plt.show()
-
-    # gray histogram
-    gray_image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
-    sns.distplot(gray_image.ravel(), bins=10, kde=True)
-    plt.title('GRY histogoram')
-    plt.show()
 
 def main():
 
@@ -183,7 +118,6 @@ def main():
     print(normal_flag)
     print(high_flag)
     print(low_flag)
-
 
     # cv.waitKey()
 if __name__ == "__main__":
