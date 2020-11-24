@@ -11,15 +11,40 @@
 #-------------------------------------------------------
 
 import os
+import seaborn as sns
 import numpy as np
 import cv2 as cv
 import matplotlib.pyplot as plt
 
 img_path = './images/demo.jpg'
 
-def brightness(img, low_threshold, high_threshold):
-    pass
+from enum import Enum
 
+class Brightness(Enum):
+
+    Normal = 0
+    LOW = 1
+    HIGH = 2
+
+
+def brightness(bgr_img, low_threshold=0.1, high_threshold=0.1):
+
+    flag = 0
+
+    gray_img = cv.cvtColor(bgr_img, cv.COLOR_BGR2GRAY)
+
+    hist = cv.calcHist([gray_img], channels=[0], mask=None, histSize=[256],
+                       ranges=[0, 255])
+
+    low_rate = sum(hist[:20]) / sum(hist)
+    high_rate = sum(hist[-20:]) / sum(hist)
+
+    if low_rate > low_threshold:
+        flag = Brightness.LOW.value
+    elif high_rate > high_threshold:
+        flag = Brightness.HIGH.value
+
+    return flag
 
 
 def tune_contrast_with_lab(bgr_img, alpha=1.0):
@@ -58,7 +83,8 @@ def tune_brightness_with_lab(bgr_img, beta=0):
 
     return new_brg_img
 
-def tune_saturation_with_hsv(bgr_img, gamma=0):
+
+def tune_saturation_with_hsv(bgr_img, gamma=1.0):
     """
 
     :param bgr_img:
@@ -100,7 +126,7 @@ def tune_contrast_brightness(image, alpha=1.0, beta=0):
 
 
 
-def show_histogram(image, channel, title='hist'):
+def show_histogram(image, title='hist'):
     """
 
     :param image:
@@ -108,37 +134,58 @@ def show_histogram(image, channel, title='hist'):
     :param title:
     :return:
     """
+
+    # fig, axs = plt.subplots(2, 2)
+    # # draw histogram
+
+    # plt.hist(image.ravel(), bins=20)
+
+    # display split channel
     img_channel = cv.split(image)
-    hist = cv.calcHist([img_channel[channel]], channels=[channel], mask=None, histSize=[256],
-                       ranges=[0, 256])
-    plt.plot(hist, color=title)
-    plt.xlim([0, 256])
+    colors = ['b', 'g', 'r']
+    for color, channel in zip(colors, img_channel):
+        sns.distplot(channel.ravel(), bins=10, kde=True, label=color)
+    plt.title('RGB histogram')
+    plt.legend()
+    plt.show()
+
+    # gray histogram
+    gray_image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+    sns.distplot(gray_image.ravel(), bins=10, kde=True)
+    plt.title('GRY histogoram')
+    plt.show()
 
 def main():
 
     alpha = 1.2
-    beta = 20
+    beta = 80
     gamma = 1.4
     bgr_img = cv.imread(img_path)
-    lab_contrast_img = tune_contrast_with_lab(bgr_img, alpha=alpha)
-    hsv_saturation_img = tune_saturation_with_hsv(bgr_img, gamma=gamma)
-    contrast_img = tune_contrast_brightness(bgr_img, alpha, 0)
-    brightness_img = tune_contrast_brightness(bgr_img, 1.0, beta)
-    # chans = cv.split(Overexpose)
-    # colors = ("b", "g", "r")
-    # for (chan, color) in zip(chans, colors):
-    #     hist = cv.calcHist([chan], [0], None, [256], [0, 256])
-    #     plt.plot(hist, color=color)
-    #     plt.xlim([0, 256])
-    cv.imshow('raw image', bgr_img)
-    cv.imshow('lab contrast image', lab_contrast_img)
-    cv.imshow('hsv saturation image', hsv_saturation_img)
-    cv.imshow('contrast image', contrast_img)
-    cv.imshow('brightness image', brightness_img)
-    cv.waitKey()
+    # lab_contrast_img = tune_contrast_with_lab(bgr_img, alpha=alpha)
+    # hsv_saturation_img = tune_saturation_with_hsv(bgr_img, gamma=gamma)
+    # contrast_img = tune_contrast_brightness(bgr_img, alpha, 0)
+    high_brightness_img = tune_contrast_brightness(bgr_img, 1.0, beta)
+    low_brightness_img = tune_contrast_brightness(bgr_img, 1.0, -beta)
 
-    show_histogram(brightness_img)
-    plt.imshow()
+    # cv.imshow('raw image', bgr_img)
+    # cv.imshow('lab contrast image', lab_contrast_img)
+    # cv.imshow('hsv saturation image', hsv_saturation_img)
+    # cv.imshow('contrast image', contrast_img)
+    # cv.imshow('brightness image', brightness_img)
 
+    # show_histogram(bgr_img, 'raw')
+    # show_histogram(brightness_img, title='brightness')
+
+    normal_flag = brightness(bgr_img)
+    high_flag = brightness(high_brightness_img)
+    low_flag = brightness(low_brightness_img)
+
+    print(normal_flag)
+    print(high_flag)
+    print(low_flag)
+
+
+    # cv.waitKey()
 if __name__ == "__main__":
     main()
+
