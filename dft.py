@@ -11,15 +11,18 @@
 #-------------------------------------------------------
 
 import matplotlib.pyplot as plt
+import matplotlib.transforms as tr
 import numpy as np
-import cv2 as cv
+from scipy import ndimage
 
 
 barbara_path = './images/DIP3E_CH4/Fig0417(a)(barbara).tif'
 rectangle_path = './images/DIP3E_CH4/Fig0424(a)(rectangle).tif'
-rectangle_translated_path = './images/DIP3E_CH4/Fig0424(a)(rectangle).tif'
+translated_rectangle_path = './images/DIP3E_CH4/Fig0425(a)(translated_rectangle).tif'
 
-def visual_fft_spectrum(spectrum, title='fft_spectrum'):
+def visual_fft_spectrum_demo(spectrum, title='fft_spectrum'):
+
+
     # load real part
     real_f = np.real(spectrum)
     # convert scale to (0, 255)
@@ -31,21 +34,60 @@ def visual_fft_spectrum(spectrum, title='fft_spectrum'):
     plt.imshow(scale_f, cmap='gray')
     plt.show()
 
+
+def visual_fft_spectrum(spectrum, title='fft_spectrum'):
+    """
+
+    :param spectrum:
+    :param title:
+    :return:
+    """
+    # centralize
+    central_f = np.fft.fftshift(spectrum)
+
+    # change scale
+    scale_f = np.log(1 + np.abs(central_f))
+    # load real part
+    real_f = np.real(scale_f)
+    # convert scale to (0, 255)
+    min = np.min(real_f)
+    max = np.max(real_f)
+    scale_f = -min + 255 / (max - min) * real_f
+    scale_f = scale_f.astype(np.uint8)
+    plt.title(title)
+    plt.imshow(scale_f, cmap='gray')
+    plt.show()
+
+
 def main():
 
-    gray_img = plt.imread(barbara_path)
+    gray_img = plt.imread(rectangle_path)
 
     # ---------------------------------- origin fft spectrum--------------------------------
-    f = np.fft.fft2(gray_img)
+    # f = np.fft.fft2(gray_img)
+    #
+    # visual_fft_spectrum_demo(f, 'origin fft spectrum')
+    # #----------------------------------- centralize spectrum--------------------------------
+    # central_f = np.fft.fftshift(f)
+    # visual_fft_spectrum_demo(central_f, 'central fft spectrum')
+    # #----------------------------------- change spectrum amplitude--------------------------
+    # scale_f = np.log(1 + np.abs(central_f))
+    # visual_fft_spectrum_demo(scale_f, 'scale fft spectrum')
 
-    visual_fft_spectrum(f, 'origin fft spectrum')
-    #----------------------------------- centralize spectrum--------------------------------
-    central_f = np.fft.fftshift(f)
-    visual_fft_spectrum(central_f, 'central fft spectrum')
-    #----------------------------------- change spectrum amplitude--------------------------
-    scale_f = np.log(1 + np.abs(central_f))
-    visual_fft_spectrum(scale_f, 'scale fft spectrum')
+    # ----------------------------------- translate-----------------------------------------
+    translated_img = plt.imread(translated_rectangle_path)
+    plt.imshow(translated_img, cmap='gray')
+    translated_f = np.fft.fft2(translated_img)
+    visual_fft_spectrum(translated_f, 'translated fft spectrum')
+
+    #----------------------------------- image rotation--------------------------------------
+    rotation_img = ndimage.rotate(gray_img, angle=45)
+    plt.imshow(rotation_img, cmap='gray')
+    rotation_f = np.fft.fft2(rotation_img)
+    visual_fft_spectrum(rotation_f, 'rotation fft spectrum')
+    plt.show()
     print('Done')
+
 
 if __name__ == "__main__":
     main()
