@@ -15,6 +15,8 @@ import matplotlib.transforms as tr
 import numpy as np
 from scipy import ndimage
 
+from tools import visual_fft_spectrum, visual_fft_phase
+
 
 barbara_path = './images/DIP3E_CH4/Fig0417(a)(barbara).tif'
 rectangle_path = './images/DIP3E_CH4/Fig0424(a)(rectangle).tif'
@@ -29,51 +31,6 @@ def visual_fft_spectrum_demo(spectrum, title='fft_spectrum'):
     min = np.min(real_f)
     max = np.max(real_f)
     scale_f = -min + 255 / (max - min) * real_f
-    scale_f = scale_f.astype(np.uint8)
-    plt.title(title)
-    plt.imshow(scale_f, cmap='gray')
-    plt.show()
-
-
-def visual_fft_spectrum(fft, title='fft_spectrum'):
-    """
-
-    :param spectrum:
-    :param title:
-    :return:
-    """
-    # centralize
-    central_f = np.fft.fftshift(fft)
-    # real value
-    abs_f = np.abs(central_f)
-    # change scale
-    scale_f = np.log(1 + abs_f)
-
-    # convert scale to (0, 255)
-    min = np.min(scale_f)
-    max = np.max(scale_f)
-    scale_f = -min + 255 / (max - min) * scale_f
-    scale_f = scale_f.astype(np.uint8)
-    plt.title(title)
-    plt.imshow(scale_f, cmap='gray')
-    plt.show()
-
-def visual_fft_phase(fft, title='fft_phase'):
-    """
-
-    :param fft:
-    :param title:
-    :return:
-    """
-    # centralize
-    central_f = np.fft.fftshift(fft)
-    real_f = np.real(central_f)
-    imag_f = np.imag(central_f)
-    phase_f = np.arctan2(imag_f, real_f)
-    # convert scale to (0, 255)
-    min = np.min(phase_f)
-    max = np.max(phase_f)
-    scale_f = -min + 255 / (max - min) * phase_f
     scale_f = scale_f.astype(np.uint8)
     plt.title(title)
     plt.imshow(scale_f, cmap='gray')
