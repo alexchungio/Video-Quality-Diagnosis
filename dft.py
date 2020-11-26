@@ -11,9 +11,9 @@
 #-------------------------------------------------------
 
 import matplotlib.pyplot as plt
-import matplotlib.transforms as tr
 import numpy as np
 from scipy import ndimage
+import cv2 as cv
 
 from tools import visual_fft_spectrum, visual_fft_phase
 
@@ -37,10 +37,8 @@ def visual_fft_spectrum_demo(spectrum, title='fft_spectrum'):
     plt.show()
 
 
-def main():
-
+def visual_fft():
     gray_img = plt.imread(rectangle_path)
-
     # ---------------------------------- origin fft spectrum--------------------------------
     f = np.fft.fft2(gray_img)
     #
@@ -68,6 +66,84 @@ def main():
     visual_fft_phase(rotation_f, 'translated fft phase')
     plt.show()
     print('Done')
+
+
+def blur_with_low_pass(image, size=30):
+    """
+
+    :param image:
+    :param size:
+    :return:
+    """
+    assert len(image.shape) == 2
+
+    img_h, img_w = image.shape
+    # padding with zero
+    # padding_img = np.zeros((3*img_h, 3*img_w), dtype=np.uint8)
+    # padding_img[0:img_h, 0:img_w] = image
+
+    # construct filter mask
+    center_y, center_x = int(img_h / 2), int(img_w / 2)
+    mask = np.zeros_like(image, dtype=np.uint8)
+    mask[center_y - size:center_y + size, center_x - size:center_x + size] = 1
+
+    # execute fft transform
+    f = np.fft.fft2(image)
+    # centralize
+    shift_f = np.fft.fftshift(f)
+    # frequency filter
+    shift_f *= mask
+
+    # invert centralize
+    ishift_f = np.fft.ifftshift(shift_f)
+    ifft_img = np.fft.ifft2(ishift_f)
+
+    #
+    blur_img = np.abs(ifft_img)
+
+    return blur_img, mask
+
+
+def sharp_with_high_pass(image, size=30, alpha=0.85):
+    """
+
+    :return:
+    """
+    assert len(image.shape) == 2
+
+    img_h, img_w = image.shape
+    # padding with zero
+    # padding_img = np.zeros((3*img_h, 3*img_w), dtype=np.uint8)
+    # padding_img[0:img_h, 0:img_w] = image
+
+    # construct filter mask
+    center_y, center_x = int(img_h / 2), int(img_w / 2)
+    mask = np.ones_like(image, dtype=np.float32)
+    mask[center_y - size:center_y + size, center_x - size:center_x + size] = alpha
+
+    # execute fft transform
+    f = np.fft.fft2(image)
+    # centralize
+    shift_f = np.fft.fftshift(f)
+    # frequency filter
+    shift_f *= mask
+
+    # invert centralize
+    ishift_f = np.fft.ifftshift(shift_f)
+    ifft_img = np.fft.ifft2(ishift_f)
+
+    filter_img = np.abs(ifft_img)
+
+    sharp_img = np.clip(filter_img, 0, 255).astype(np.uint8)
+
+    return sharp_img, mask
+
+
+def main():
+    gray_imag = cv.imread(barbara_path, cv.IMREAD_GRAYSCALE)
+    sharp_img, high_mask = sharp_with_high_pass(gray_imag)
+    plt.imshow(sharp_img, cmap='gray')
+    plt.show()
 
 
 if __name__ == "__main__":
