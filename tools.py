@@ -50,6 +50,36 @@ def show_histogram(image, title='hist'):
         plt.show()
 
 
+def get_space_scale(mode=cv.COLOR_RGB2LAB):
+
+    # define three color pixel
+    bgr_pixel = np.array([[[0, 0, 0],
+                          [255, 0, 0],
+                          [0, 255, 0],
+                          [0, 0, 255],
+                          [255, 255, 0],
+                          [255, 0, 255],
+                          [0, 255, 255],
+                          [255, 255, 255]]], dtype=np.uint8)
+
+    space_pixel = cv.cvtColor(bgr_pixel, code=mode)
+
+    c_1, c_2, c_3 = cv.split(space_pixel)
+
+    def check_max_range(c):
+        assert np.max(c) <= 255
+        if np.max(c) < 180:
+            max_size = 180
+        elif np.max(c) > 180:
+            max_size = 255
+
+        return max_size
+
+    space_scale = ((0, check_max_range(c)) for c in [c_1, c_2, c_3])
+
+    return space_scale
+
+
 def visual_fft_magnitude(fft, title='fft_magnitude'):
     """
 
