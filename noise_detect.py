@@ -10,8 +10,10 @@
 # @ Software   : PyCharm
 #-------------------------------------------------------
 
+import matplotlib.pyplot as plt
 import numpy as np
 import cv2 as cv
+from tools import visual_fft_magnitude
 
 
 class GeneratorNoise(object):
@@ -67,17 +69,74 @@ class GeneratorNoise(object):
         noisy = image + image * gauss
         return noisy
 
+
+
+def noise_detect(image, center_rate=0.005, threshold=0.01, visual=False):
+    """
+    detect high frequency percent
+    :param image:
+    :param center_rate:
+    :param threshold:
+    :return:
+    """
+    assert len(image.shape) == 2
+    rows, cols = image.shape
+    # gray_img = cv.imread(image, flags=cv.IMREAD_GRAYSCALE)
+
+    fft = np.fft.fft2(image)
+    # centralize
+    central_f = np.fft.fftshift(fft)
+    # real value
+    abs_f = np.abs(central_f)
+    # change scale
+    scale_f = np.log(1 + abs_f)
+
+    row_length = int(rows * center_rate)
+    col_length = int(cols * center_rate)
+
+    row_low = int((rows - row_length) / 2)
+    row_high = row_low + row_length
+
+    col_low = int((cols - col_length) / 2)
+    col_high = col_low + col_length
+
+    mask = np.zeros_like(image, dtype=np.float32)
+
+    mask[row_low:row_high, :] = 1
+    mask[:, col_low:col_high] = 1
+
+    fft_center = scale_f * mask
+
+    center_percent = np.sum(fft_center) / np.sum(scale_f)
+    if visual:
+        cv.normalize(fft_center, fft_center, 0, 1, cv.NORM_MINMAX)
+        fft_center *= 255.
+        fft_center = fft_center.astype(np.uint8)
+
+        plt.imshow(fft_center, cmap='gray')
+        plt.show()
+    return center_percent < threshold
+
+
 def main():
-    img_path = './images/cat.jpg'
+    img_path = './images/noise.jpg'
     image = cv.imread(img_path, flags=cv.IMREAD_COLOR)
 
+    gray_img = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
     generator_noise = GeneratorNoise()
     gauss_img = generator_noise.gauss_noise(image)
-    sp_img = generator_noise.salt_pepper_noise(image, rate=0.1)
-    cv.imshow('gauss image', gauss_img)
-    cv.imshow('s&p image', sp_img)
-    cv.waitKey(0)
+    sp_img = generator_noise.salt_pepper_noise(image, rate=0.01)
+    gray_sp = cv.cvtColor(sp_img, cv.COLOR_BGR2GRAY)
+    # visual_fft_magnitude(gray_img)
+    # visual_fft_magnitude(gray_sp)
+    # cv.imshow('gauss image', gauss_img)
+    # cv.imshow('s&p image', gray_sp)
+    # cv.waitKey(0)
 
+    # print(noise_detect(gray_sp) / noise_detect(gray_img))
+
+    print(noise_detect(gray_img))
+    print(noise_detect(gray_sp))
 
 
 if __name__ == "__main__":
