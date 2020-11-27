@@ -17,7 +17,7 @@ import cv2 as cv
 
 from tools import visual_fft_magnitude, visual_fft_phase, visual_magnitude_with_opencv
 
-
+cat_path = './images/cat.jpg'
 barbara_path = './images/DIP3E_CH4/Fig0417(a)(barbara).tif'
 rectangle_path = './images/DIP3E_CH4/Fig0424(a)(rectangle).tif'
 translated_rectangle_path = './images/DIP3E_CH4/Fig0425(a)(translated_rectangle).tif'
@@ -38,34 +38,35 @@ def visual_fft_spectrum_demo(spectrum, title='fft_spectrum'):
 
 
 def visual_fft():
-    gray_img = plt.imread(rectangle_path)
+
+    gray_img = cv.imread(rectangle_path, flags=cv.IMREAD_GRAYSCALE)
     # ---------------------------------- origin fft spectrum--------------------------------
     f = np.fft.fft2(gray_img)
     #
-    # visual_fft_spectrum_demo(f, 'origin fft spectrum')
-    # #----------------------------------- centralize spectrum--------------------------------
-    # central_f = np.fft.fftshift(f)
-    # visual_fft_spectrum_demo(central_f, 'central fft spectrum')
-    # #----------------------------------- change spectrum amplitude--------------------------
-    # scale_f = np.log(1 + np.abs(central_f))
-    # visual_fft_spectrum_demo(scale_f, 'scale fft spectrum')
-    visual_fft_magnitude(f, 'origin fft spectrum')
-    visual_fft_phase(f, 'origin fft phase')
-
-    # ----------------------------------- translate-----------------------------------------
-    translated_img = plt.imread(translated_rectangle_path)
-    plt.imshow(translated_img, cmap='gray')
-    translated_f = np.fft.fft2(translated_img)
-    visual_fft_magnitude(translated_f, 'translated fft spectrum')
-    visual_fft_phase(translated_f, 'translated fft phase')
-    #----------------------------------- image rotation--------------------------------------
-    rotation_img = ndimage.rotate(gray_img, angle=45)
-    plt.imshow(rotation_img, cmap='gray')
-    rotation_f = np.fft.fft2(rotation_img)
-    visual_fft_magnitude(rotation_f, 'rotation fft spectrum')
-    visual_fft_phase(rotation_f, 'translated fft phase')
-    plt.show()
-    print('Done')
+    visual_fft_spectrum_demo(f, 'origin fft spectrum')
+    #----------------------------------- centralize spectrum--------------------------------
+    central_f = np.fft.fftshift(f)
+    visual_fft_spectrum_demo(central_f, 'central fft spectrum')
+    #----------------------------------- change spectrum amplitude--------------------------
+    scale_f = np.log(1 + np.abs(central_f))
+    visual_fft_spectrum_demo(scale_f, 'scale fft spectrum')
+    # visual_fft_magnitude(f, 'origin fft spectrum')
+    # visual_fft_phase(f, 'origin fft phase')
+    #
+    # # ----------------------------------- translate-----------------------------------------
+    # translated_img = plt.imread(translated_rectangle_path)
+    # plt.imshow(translated_img, cmap='gray')
+    # translated_f = np.fft.fft2(translated_img)
+    # visual_fft_magnitude(translated_f, 'translated fft spectrum')
+    # visual_fft_phase(translated_f, 'translated fft phase')
+    # #----------------------------------- image rotation--------------------------------------
+    # rotation_img = ndimage.rotate(gray_img, angle=45)
+    # plt.imshow(rotation_img, cmap='gray')
+    # rotation_f = np.fft.fft2(rotation_img)
+    # visual_fft_magnitude(rotation_f, 'rotation fft spectrum')
+    # visual_fft_phase(rotation_f, 'translated fft phase')
+    # plt.show()
+    # print('Done')
 
 
 def blur_with_numpy(image, size=30):
@@ -169,7 +170,8 @@ def blur_with_opencv(image, size=30):
     # image_ = planes[0]
 
     shift_img = np.fft.fftshift(dft_img)
-    shift_img *= mask
+    # shift_img *= mask
+    # shift_img = cv.bitwise_and(shift_img, mask)
 
     # invert centralize
     ishift_img = np.fft.ifftshift(shift_img)
@@ -193,17 +195,19 @@ def blur_with_opencv(image, size=30):
 
 def main():
 
-    image = cv.imread(barbara_path, cv.IMREAD_GRAYSCALE)
-    if image is None:
-        print('Error opening image')
-        return -1
+    image = cv.imread(rectangle_path, cv.IMREAD_GRAYSCALE)
+    # if image is None:
+    #     print('Error opening image')
+    #     return -1
+    #
+    # # mag_img = visual_magnitude_with_opencv(image)
+    # # [normalize]
+    # blur_img = blur_with_opencv(image)
+    # cv.imshow("Input Image"       , image)    # Show the result
+    # cv.imshow("spectrum magnitude", blur_img)
+    # cv.waitKey()
 
-    # mag_img = visual_magnitude_with_opencv(image)
-    # [normalize]
-    blur_img = blur_with_opencv(image)
-    cv.imshow("Input Image"       , image)    # Show the result
-    cv.imshow("spectrum magnitude", blur_img)
-    cv.waitKey()
+    visual_fft()
 
 if __name__ == "__main__":
     main()
