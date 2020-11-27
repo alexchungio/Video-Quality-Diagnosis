@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #------------------------------------------------------
 # @ File       : color_deviation.py
-# @ Description:  
+# @ Description: reference
 # @ Author     : Alex Chung
 # @ Contact    : yonganzhong@outlook.com
 # @ License    : Copyright (c) 2017-2018
@@ -12,7 +12,7 @@
 
 import cv2 as cv
 import numpy as np
-
+from tools import get_space_scale
 
 img_path = './images/cat.jpg'
 
@@ -38,7 +38,10 @@ def tune_color(image, alpha=1.8, beta=1.0, gamma=1.0):
 
 def color_deviation(image, threshold = 1.5):
     """
-
+    true scale vs opencv scale:
+    l => (0, 100) => (0, 255)
+    a => (-128, 128) =. (0, 255)
+    b => (-128, 128) => (0, 255)
     :param image:
     :param threshold:
     :return:
@@ -49,24 +52,30 @@ def color_deviation(image, threshold = 1.5):
 
     l, a, b = cv.split(lab_img)
 
-    d_a = np.mean(a) - 128
-    d_b = np.mean(b) - 128
+    # convert scale to (-128, 128)
+    # center coordinates of equivalent c
+    d_a = np.mean(a) - 128   # (0, 255) => (-180, 180)
+    d_b = np.mean(b) - 128  # (0, 255) => (-180, 180)
+    # computer
     d = np.sqrt(d_a ** 2 + d_b **2)
 
-    m_a = np.mean(np.abs(a - d_a - 128))
-    m_b = np.mean(np.abs(b - d_b - 128))
+    #
+    # use abs replace square operation
+    # convert scale to (-128, 128)
+    m_a = np.mean(np.abs(a - d_a - 128))  # (0, 255) => (-180, 180)
+    m_b = np.mean(np.abs(b - d_b - 128))  # (0, 255) => (-180, 180)
     m = np.sqrt(m_a ** 2 + m_b ** 2)
 
     k = d / m
 
     return k < threshold
 
-
 def main():
     image = cv.imread(img_path, flags=cv.IMREAD_COLOR)
     color_img = tune_color(image)
     origin_k = color_deviation(image)
     color_k = color_deviation(color_img)
+    # get_space_scale()
     print(origin_k)
     print(color_k)
     cv.imshow('origin image', image)
