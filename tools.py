@@ -80,13 +80,15 @@ def get_space_scale(mode=cv.COLOR_RGB2LAB):
     return space_scale
 
 
-def visual_fft_magnitude(fft, title='fft_magnitude'):
+def visual_fft_magnitude(image, title='fft spectrum'):
     """
 
     :param spectrum:
     :param title:
     :return:
     """
+    assert len(image.shape) == 2
+    fft = np.fft.fft2(image)
     # centralize
     central_f = np.fft.fftshift(fft)
     # real value
@@ -95,12 +97,30 @@ def visual_fft_magnitude(fft, title='fft_magnitude'):
     scale_f = np.log(1 + abs_f)
 
     # convert scale to (0, 255)
-    min = np.min(scale_f)
-    max = np.max(scale_f)
-    scale_f = -min + 255 / (max - min) * scale_f
-    scale_f = scale_f.astype(np.uint8)
+    # min = np.min(scale_f)
+    # max = np.max(scale_f)
+    # scale_f = -min + 255 / (max - min) * scale_f
+
+    cv.normalize(abs_f, abs_f, 0, 1, cv.NORM_MINMAX)
+    print(np.max(abs_f))
+    abs_f *= 255.
+    center_f = abs_f.astype(np.uint8)
+
+    cv.normalize(scale_f, scale_f, 0, 1, cv.NORM_MINMAX)
+    scale_f *= 255.
+    scale_f = scale_f .astype(np.uint8)
+
+    # display the original input image
+    (fig, ax) = plt.subplots(1, 3, )
+
+    for i, (img, name) in enumerate(zip([image, center_f, scale_f], ['input', 'center', 'center & log'])):
+
+        ax[i].imshow(img, cmap="gray")
+        ax[i].set_title(name)
+        ax[i].set_xticks([])
+        ax[i].set_yticks([])
+
     plt.title(title)
-    plt.imshow(scale_f, cmap='gray')
     plt.show()
 
 
