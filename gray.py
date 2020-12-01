@@ -16,10 +16,10 @@ import cv2 as cv
 import numpy as np
 from tools import show_histogram
 
-img_path = './images/demo.jpg'
+img_path = './images/cat.jpg'
 
 
-def gray_detect(image, threshold=0.83):
+def gray_detect(image, threshold=0.83, visual=False):
 
     shape = image.shape
 
@@ -31,6 +31,9 @@ def gray_detect(image, threshold=0.83):
         hsv_hist = cv.calcHist([hsv_img], [1], None, [256], [0, 255])
 
         low_saturation_ratio = sum(hsv_hist[:25]) / sum(hsv_hist)
+
+        if visual:
+            show_histogram(hsv_img, 'hsv')
 
         return low_saturation_ratio > threshold
 
