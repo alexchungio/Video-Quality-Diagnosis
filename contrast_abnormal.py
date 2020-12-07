@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #------------------------------------------------------
-# @ File       : contrast.py
+# @ File       : contrast_abnormal.py
 # @ Description: https://eurradiolexp.springeropen.com/track/pdf/10.1186/s41747-017-0023-4.pdf
 # @ Author     : Alex Chung
 # @ Contact    : yonganzhong@outlook.com

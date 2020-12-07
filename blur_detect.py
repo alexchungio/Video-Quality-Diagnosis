@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #------------------------------------------------------
-# @ File       : blur.py
+# @ File       : blur_detect.py
 # @ Description:  https://www.pyimagesearch.com/2020/06/15/opencv-fast-fourier-transform-fft-for-blur-detection-in-images-and-video-streams/
 # @ Author     : Alex Chung
 # @ Contact    : yonganzhong@outlook.com

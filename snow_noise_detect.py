@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #------------------------------------------------------
-# @ File       : noise_detect.py
+# @ File       : snow_noise_detect.py
 # @ Description:  
 # @ Author     : Alex Chung
 # @ Contact    : yonganzhong@outlook.com
@@ -71,7 +71,7 @@ class GeneratorNoise(object):
 
 
 
-def noise_detect(image, center_rate=0.005, threshold=0.01, visual=False):
+def snow_noise_detect(image, center_rate=0.005, threshold=0.01, visual=False):
     """
     detect high frequency percent
     :param image:
@@ -136,8 +136,8 @@ def main():
     # center_rate = 0.005
     # print(noise_detect(gray_sp, center_rate=center_rate) / noise_detect(gray_img, center_rate=center_rate))
 
-    print(noise_detect(gray_img))
-    print(noise_detect(gray_sp))
+    print(snow_noise_detect(gray_img))
+    print(snow_noise_detect(gray_sp))
 
 
 if __name__ == "__main__":

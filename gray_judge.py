@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #------------------------------------------------------
-# @ File       : gray.py
+# @ File       : gray_judge.py
 # @ Description:  
 # @ Author     : Alex Chung
 # @ Contact    : yonganzhong@outlook.com
@@ -19,7 +19,7 @@ from tools import show_histogram
 img_path = './images/demo.jpg'
 
 
-def gray_detect(image, threshold=0.83, visual=False):
+def gray_judge(image, threshold=0.83, visual=False):
 
     shape = image.shape
 
@@ -68,7 +68,7 @@ def main():
     show_histogram(hsv_img)
 
     # flag_0 = gray_detect(bgr_img)
-    flag_1 = gray_detect(new_bgr_img)
+    flag_1 = gray_judge(new_bgr_img)
 
     print(flag_1)
 

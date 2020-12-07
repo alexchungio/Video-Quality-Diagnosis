@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #------------------------------------------------------
-# @ File       : brightness.py
+# @ File       : brightness_abnormal.py
 # @ Description:  'https://docs.opencv.org/3.4/d3/dc1/tutorial_basic_linear_transform.html'
 # @ Author     : Alex Chung
 # @ Contact    : yonganzhong@outlook.com
