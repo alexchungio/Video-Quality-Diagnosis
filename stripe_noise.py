@@ -23,14 +23,14 @@ img_path = './images/stripe/stripe_1.jpg'
 # img_path = './images/demo.jpg'
 
 
-def detect_stripe_with_fft(image, size=30, threshold=20, visualize=False):
+def detect_stripe_with_fft(image, size=30, threshold=10, visualize=False):
     """
 
     :param image:
     :param size:
     :param threshold:
     :param visualize:
-    :return:
+    :return
     """
 
     assert len(image.shape) == 2, "Image format must be gray"
@@ -48,17 +48,17 @@ def detect_stripe_with_fft(image, size=30, threshold=20, visualize=False):
     # scale transform
     cv.normalize(abs_fft, abs_fft, 0, 1, cv.NORM_MINMAX)
     # suppress the direct component value of fft
-    abs_fft *= 250
+    abs_fft *= 500
     abs_fft = np.clip(abs_fft, 0, 255)
-    center_fft = abs_fft.astype(np.uint8)
+    abs_fft = abs_fft.astype(np.uint8)
 
     # mask operation
-    mask_center_fft = center_fft.copy()
+    mask_center_fft = abs_fft.copy()
     mask_center_fft[center_y - size:center_y + size, center_x - size:center_x + size] = 0
 
     if visualize:
         (fig, ax) = plt.subplots(1, 3, )
-        for i, (img, name) in enumerate(zip([image, center_fft, mask_center_fft], ['input', 'center', 'center & mask'])):
+        for i, (img, name) in enumerate(zip([image, abs_fft, mask_center_fft], ['input', 'center', 'center & mask'])):
             ax[i].imshow(img, cmap="gray")
             ax[i].set_title(name)
             ax[i].set_xticks([])
@@ -67,18 +67,22 @@ def detect_stripe_with_fft(image, size=30, threshold=20, visualize=False):
 
     # get number of highlight point
     grad_fft = cv.Laplacian(mask_center_fft, cv.CV_32F)
-    highlight_point = grad_fft > 1
+    highlight_point = grad_fft > 4
     num_highlight = np.sum(highlight_point)
 
+    print(num_highlight)
+
     return num_highlight > threshold
+
 
 
 def main():
 
     bgr_img = cv.imread(img_path, flags=cv.IMREAD_COLOR)
-    gray_img = cv.cvtColor(bgr_img, code=cv.COLOR_BGR2GRAY)
+    # gray_img = cv.cvtColor(bgr_img, code=cv.COLOR_BGR2GRAY)
+    gray_img = cv.cvtColor(bgr_img, code=cv.COLOR_BGR2HSV)
 
-    stripe_flag = detect_stripe_with_fft(gray_img, visualize=True)
+    stripe_flag = detect_stripe_with_fft(gray_img[:, :, 0], visualize=True)
     print(stripe_flag)
 
     print('Done')
