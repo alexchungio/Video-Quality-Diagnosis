@@ -162,7 +162,7 @@ def blur_with_opencv(image, size=30):
     # -------------------------Make the Discrete Fourier Transform-----------------------------------
     dft_img = cv.dft(complex_img)  # this way the result may fit in the source matrix
 
-    # -------------------------ransform the real and complex values to magnitude--------------------
+    # -------------------------transform the real and complex values to magnitude--------------------
     # compute the magnitude and switch to logarithmic scale
     # = > M = sqrt(Re(DFT(I)) ^ 2 + Im(DFT(I)) ^ 2)
     # cv.split(complexI, planes)  # planes[0] = Re(DFT(I), planes[1] = Im(DFT(I))

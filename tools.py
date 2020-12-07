@@ -29,24 +29,24 @@ def show_histogram(image, title='hist'):
     # # draw histogram
     # plt.hist(image.ravel(), bins=20)
     assert len(image.shape) in [2, 3]
-    if image.shape == 3:
+    if len(image.shape) == 3:
         # display split channel
         img_channel = cv.split(image)
         colors = ['b', 'g', 'r']
         for color, channel in zip(colors, img_channel):
             sns.distplot(channel.ravel(), bins=25, kde=True, label=color)
-        plt.title('RGB histogram')
+        plt.title('{} histogram'.format(title))
         plt.legend()
         plt.show()
 
         # gray histogram
-        gray_image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
-        sns.distplot(gray_image.ravel(), bins=25, kde=True)
-        plt.title('GRY histogram')
-        plt.show()
+        # gray_image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+        # sns.distplot(gray_image.ravel(), bins=25, kde=True)
+        # plt.title('GRY histogram')
+        # plt.show()
     else:
         sns.distplot(image.ravel(), bins=25, kde=True)
-        plt.title('GRY histogram')
+        plt.title('{0} histogram'.title())
         plt.show()
 
 
@@ -103,7 +103,8 @@ def visual_fft_magnitude(image, title='fft spectrum'):
 
     cv.normalize(abs_f, abs_f, 0, 1, cv.NORM_MINMAX)
     print(np.max(abs_f))
-    abs_f *= 255.
+    abs_f *= 250
+    # abs_f = np.clip(abs_f, 0, 255)
     center_f = abs_f.astype(np.uint8)
 
     cv.normalize(scale_f, scale_f, 0, 1, cv.NORM_MINMAX)

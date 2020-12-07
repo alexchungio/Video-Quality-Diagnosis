@@ -21,7 +21,7 @@ class GeneratorNoise(object):
     'gauss'     Gaussian-distributed additive noise.
     'poisson'   Poisson-distributed noise generated from the data.
     's&p'       Replaces random pixels with 0 or 1.
-    'speckle'   Multiplicative noise using out = image + n*image,where
+    'stripe'   Multiplicative noise using out = image + n*image,where
                 n,is uniform noise with specified mean & variance.
     """
     def __init__(self):
@@ -115,25 +115,26 @@ def noise_detect(image, center_rate=0.005, threshold=0.01, visual=False):
 
         plt.imshow(fft_center, cmap='gray')
         plt.show()
+
     return center_percent < threshold
 
 
 def main():
-    img_path = './images/noise.jpg'
+    img_path = './images/blur/blur_1.jpg'
     image = cv.imread(img_path, flags=cv.IMREAD_COLOR)
 
     gray_img = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
     generator_noise = GeneratorNoise()
     gauss_img = generator_noise.gauss_noise(image)
-    sp_img = generator_noise.salt_pepper_noise(image, rate=0.01)
+    sp_img = generator_noise.salt_pepper_noise(image, rate=0.1)
     gray_sp = cv.cvtColor(sp_img, cv.COLOR_BGR2GRAY)
     # visual_fft_magnitude(gray_img)
     # visual_fft_magnitude(gray_sp)
     # cv.imshow('gauss image', gauss_img)
     # cv.imshow('s&p image', gray_sp)
     # cv.waitKey(0)
-
-    # print(noise_detect(gray_sp) / noise_detect(gray_img))
+    # center_rate = 0.005
+    # print(noise_detect(gray_sp, center_rate=center_rate) / noise_detect(gray_img, center_rate=center_rate))
 
     print(noise_detect(gray_img))
     print(noise_detect(gray_sp))

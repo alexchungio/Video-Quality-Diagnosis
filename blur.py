@@ -14,6 +14,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import cv2 as cv
 
+from tools import visual_fft_magnitude
+
 
 def detect_blur_fft(image, size=60, thresh=10, vis=False):
     """
@@ -139,6 +141,8 @@ def main():
     gray_image = cv.cvtColor(bgr_img, code=cv.COLOR_BGR2GRAY)
     # f = np.fft.fft2(gray_image)
     # visual_fft_spectrum(f)
+
+    visual_fft_magnitude(gray_image)
     test(gray_image, size, threshold, visual)
 
     print('Done')

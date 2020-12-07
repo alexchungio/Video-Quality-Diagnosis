@@ -47,13 +47,13 @@ def detect_stripe_with_fft(image, size=30, threshold=20, visualize=False):
 
     # scale transform
     cv.normalize(abs_fft, abs_fft, 0, 1, cv.NORM_MINMAX)
+    # suppress the direct component value of fft
     abs_fft *= 250
     abs_fft = np.clip(abs_fft, 0, 255)
     center_fft = abs_fft.astype(np.uint8)
 
-    mask_center_fft = center_fft.copy()
-
     # mask operation
+    mask_center_fft = center_fft.copy()
     mask_center_fft[center_y - size:center_y + size, center_x - size:center_x + size] = 0
 
     if visualize:

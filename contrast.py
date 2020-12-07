@@ -17,7 +17,7 @@ from tools import show_histogram
 img_path = './images/fog_1.jpg'
 
 
-def contrast(bgr_img, rate=0.7, range=40):
+def contrast(bgr_img, threshold=0.7, range=40):
 
     gray_img = cv.cvtColor(bgr_img, cv.COLOR_BGR2GRAY)
 
@@ -33,7 +33,8 @@ def contrast(bgr_img, rate=0.7, range=40):
     gather_rate = sum(gather_pixel) / sum(hist)
     print(gather_rate)
 
-    return gather_rate > rate
+    return gather_rate > threshold
+
 
 def low_contrast(src, fraction_threshold=0.5, lower_percentile=1,
                     upper_percentile=99):

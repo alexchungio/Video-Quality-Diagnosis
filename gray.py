@@ -16,7 +16,7 @@ import cv2 as cv
 import numpy as np
 from tools import show_histogram
 
-img_path = './images/cat.jpg'
+img_path = './images/demo.jpg'
 
 
 def gray_detect(image, threshold=0.83, visual=False):
@@ -43,20 +43,21 @@ def main():
 
     ratio = 0.001
     bgr_img = cv.imread(img_path, flags=cv.IMREAD_COLOR)
-    # gray_img = cv.cvtColor(bgr_img, code=cv.COLOR_BGR2GRAY)
+    gray_img = cv.cvtColor(bgr_img, code=cv.COLOR_BGR2GRAY)
+
+
     #
-    # new_bgr_img = cv.cvtColor(gray_img, code=cv.COLOR_GRAY2BGR)
-    #
-    hsv_img = cv.cvtColor(bgr_img, code=cv.COLOR_RGB2HSV)
+    hsv_img = cv.cvtColor(bgr_img, code=cv.COLOR_BGR2HSV)
     # bgr_hsv_hist = cv.calcHist([hsv_img], [1], None, [256], [0, 255])
     #
     # show_histogram(bgr_img, 'brg')
-    # show_histogram(hsv_img, 'hsv')
+    show_histogram(hsv_img, 'hsv')
     #
-    # new_bgr_img = np.stack([gray_img, gray_img, gray_img], axis=2)
-    # new_hsv_img = cv.cvtColor(new_bgr_img, code=cv.COLOR_RGB2HSV)
+    # new_bgr_img = cv.cvtColor(gray_img, code=cv.COLOR_GRAY2BGR)
+    new_bgr_img = np.stack([gray_img, gray_img, gray_img], axis=2)
+    new_hsv_img = cv.cvtColor(new_bgr_img, code=cv.COLOR_BGR2HSV)
     # show_histogram(new_bgr_img, 'new_bgr')
-    # show_histogram(new_hsv_img, 'new_hsv')
+    show_histogram(new_hsv_img, 'new_hsv')
     #
     # gray_hsv_hist = cv.calcHist([new_hsv_img], [1], None, [256], [0,255])
 
@@ -64,7 +65,7 @@ def main():
     hsv_img[:, :, 1] = np.clip(hsv_img[:, :, 1].copy() * 0.2, 0, 255).astype(np.uint8)
 
     new_bgr_img = cv.cvtColor(hsv_img, code=cv.COLOR_HSV2BGR)
-    # show_histogram(hsv_img)
+    show_histogram(hsv_img)
 
     # flag_0 = gray_detect(bgr_img)
     flag_1 = gray_detect(new_bgr_img)
