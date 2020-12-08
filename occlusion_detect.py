@@ -16,7 +16,32 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-img_path = './images/occlusion/occlusion_0.jpg'
+img_path = './images/occlusion/occlusion_1.jpg'
+
+
+def check_contour_contain(large_contour, small_contour):
+    """
+
+    :param contour_0:
+    :param contour_1:
+    :return:
+    """
+    large_x, large_y = large_contour[:, :, 0].flatten(), large_contour[:, :, 1].flatten()
+    small_x, small_y = small_contour[:, :, 0].flatten(), small_contour[:, :, 1].flatten()
+
+    large_x = sorted(large_x)
+    large_y = sorted(large_y)
+
+    small_x = sorted(small_x)
+    small_y = sorted(small_y)
+
+    if small_x[0] > large_x[0] and small_x[-1] < large_x[-1]:
+        if small_y[0]> large_y[0] and small_y[-1] < large_y[-1]:
+            return True
+        else:
+            return False
+    else:
+        return False
 
 
 def get_leaf_area(image, visualize=False):
@@ -41,17 +66,26 @@ def get_leaf_area(image, visualize=False):
     kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, (3, 3))
     # tree_mask = cv.morphologyEx(tree_mask, cv.MORPH_OPEN, kernel)
     # tree_mask = cv.morphologyEx(tree_mask, cv.MORPH_CLOSE, kernel, iterations=3)
-    tree_mask = cv.dilate(tree_mask, kernel=kernel, iterations=3)
+    tree_mask = cv.dilate(tree_mask, kernel=kernel, iterations=30)
 
 
     # Find contours
-
     contours, hierarchy = cv.findContours(tree_mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
 
-    # Draw contours
+    # for contour in contours:
+    #     print(cv.isContourConvex(contour))
+    #     print(cv.contourArea(contour))
+
+    contour_area = [cv.contourArea(contour) for contour in contours]
+
+    area_index = [i for i,v in sorted(enumerate(contour_area), key=lambda x:x[1])[::-1]][:2]
+
+
+    top_contour = [contours[index] for index in area_index]
 
     # Show in a window
-
+    is_contain = check_contour_contain(top_contour[0], top_contour[1])
+    print(is_contain)
 
     if visualize:
 
@@ -59,7 +93,8 @@ def get_leaf_area(image, visualize=False):
         plt.imshow(tree_area[:, :, ::-1])
         plt.axis('off')
         plt.show()
-        cv.drawContours(tree_area, contours, -1, (0, 0, 255), 3)
+        cv.drawContours(tree_area, top_contour, -1, (0, 0, 255), 3)
+        plt.axis('off')
         plt.imshow(tree_area[:, :, ::-1])
         plt.show()
 
