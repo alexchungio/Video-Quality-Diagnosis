@@ -21,6 +21,7 @@ img_path_2 = './images/demo.jpg'
 jitter_video_path = './images/jitter/jitter.mp4'
 stability_video_path = './images/jitter/stability.mp4'
 
+
 def video_jitter_detect(pre_img, cur_img, threshold=3, m=3):
 
     pre_gray_img = cv.cvtColor(pre_img, code=cv.COLOR_BGR2GRAY)
@@ -137,9 +138,6 @@ def main():
             cv.waitKey(wait_time)
         except:
             print("Can't receive frame")
-
-
-
 
 
 if __name__ == "__main__":
