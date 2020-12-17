@@ -11,6 +11,7 @@
 #-------------------------------------------------------
 
 import os
+import time
 import numpy as np
 import cv2 as cv
 import matplotlib.pyplot as plt
@@ -135,23 +136,24 @@ def main():
     cap = cv.VideoCapture(stability_video_path)
 
     fps = cap.get(cv.CAP_PROP_FPS)
-    wait_time = int(1000 / fps)
+    wait_time = int(1000 / fps) # ms
 
     _, pre_frame = cap.read()
     while cap.isOpened():
         try:
+            start_time = time.perf_counter()
             ret, cur_frame = cap.read()
             if not ret:
                 break
-
             jitter = video_jitter_detect(pre_frame, cur_frame)
             flag = 'jitter' if jitter else 'stability'
             color = (0, 0, 255) if jitter else (0, 255, 0)
             cv.putText(cur_frame, flag, (10, 25), cv.FONT_HERSHEY_SIMPLEX,
                        0.7, color, 2)
             pre_frame = cur_frame
+            cost_time = int((time.perf_counter() - start_time) * 1000)  # ms
             cv.imshow('video', cur_frame)
-            cv.waitKey(wait_time)
+            cv.waitKey(wait_time-cost_time)
         except:
             print("Can't receive frame")
 
