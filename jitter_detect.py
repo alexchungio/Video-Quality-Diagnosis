@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #------------------------------------------------------
 # @ File       : jitter_detect.py
-# @ Description:  
+# @ Description:
 # @ Author     : Alex Chung
 # @ Contact    : yonganzhong@outlook.com
 # @ License    : Copyright (c) 2017-2018
@@ -23,7 +23,14 @@ stability_video_path = './images/jitter/stability.mp4'
 
 
 def video_jitter_detect(pre_img, cur_img, threshold=3, m=3):
+    """
 
+    :param pre_img:
+    :param cur_img:
+    :param threshold:
+    :param m:
+    :return:
+    """
     pre_gray_img = cv.cvtColor(pre_img, code=cv.COLOR_BGR2GRAY)
     cur_gray_img = cv.cvtColor(cur_img, code=cv.COLOR_BGR2GRAY)
 
@@ -43,7 +50,6 @@ def video_jitter_detect(pre_img, cur_img, threshold=3, m=3):
 
 def cross_correlation(ref_projection, cur_projection, m=4):
     """
-
     :param pre_projection: reference image projection
     :param cur_projection: current image projection
     :param m: search size
@@ -67,7 +73,12 @@ def cross_correlation(ref_projection, cur_projection, m=4):
 
 
 def plot_projection(p_row, p_col):
+    """
 
+    :param p_row:
+    :param p_col:
+    :return:
+    """
     row_x = np.arange(len(p_row))
     row_y = p_row
 
@@ -83,7 +94,12 @@ def plot_projection(p_row, p_col):
 
 
 def gray_projection(gray_img, reduce_mean=False):
+    """
 
+    :param gray_img:
+    :param reduce_mean:
+    :return:
+    """
     g_row = gray_img.sum(axis=1)
     g_col = gray_img.sum(axis=0)
 
