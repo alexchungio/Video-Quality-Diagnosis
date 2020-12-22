@@ -19,8 +19,9 @@ import imutils
 
 image_path = './images/scene/scene_0.jpg'
 
-train_image_path = './images/scene/scene_0.jpg'
-query_image_path = './images/scene/scene_1.jpg'
+train_image_path = './images/scene/scene_3.jpg'
+query_image_path = './images/scene/scene_4.jpg'
+
 
 def harris_corner_detect(image):
     rgb_img = cv.cvtColor(image, code=cv.COLOR_BGR2RGB)
@@ -127,8 +128,11 @@ def match_keypoint_with_knn(features_a, features_b, ratio=0.7, match_type='bf', 
     elif match_type == 'flann':
         matcher = create_matcher_with_flann()
 
+        features_a = features_a.astype(np.float32)
+        features_b = features_b.astype(np.float32)
+
     # compute the raw matches and initialize the list of actual matches
-    match_point = matcher.knnMatch(features_a, features_b, 2)
+    match_point = matcher.knnMatch(features_a, features_b, k=2)
     # print("Raw matches (knn):", len(match_point))
     matches = []
     # loop over the raw matches
@@ -162,9 +166,9 @@ def get_homography(kps_a, kps_b, matches, reproj_thresh=4.0):
 
 
 def main():
-    # bgr_img = cv.imread(image_path, flags=cv.IMREAD_COLOR)
-    #
-    # harris_corner_detect(bgr_img)
+    bgr_img = cv.imread(image_path, flags=cv.IMREAD_COLOR)
+
+    harris_corner_detect(bgr_img)
 
     train_img = imageio.imread(train_image_path)
     train_img_gray = cv.cvtColor(train_img, cv.COLOR_RGB2GRAY)
@@ -189,14 +193,13 @@ def main():
 
     # show_keypoint(train_img_gray, kps_a, query_img_gray, kps_b)
 
-    matches = match_keypoint_with_knn(des_a, des_b, ratio=ratio, method=feature_extractor)
+    matches = match_keypoint_with_knn(des_a, des_b, ratio=ratio, match_type='bf', method=feature_extractor)
     print(len(matches))
 
-    match_img = cv.drawMatches(train_img, kps_a, query_img, kps_b, matches,
-                           None, matchColor=(0, 255, 0), flags=cv.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
-    plt.imshow(match_img)
-    plt.show()
-
+    # match_img = cv.drawMatches(train_img, kps_a, query_img, kps_b, matches,
+    #                        None, matchColor=(0, 255, 0), flags=cv.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
+    # plt.imshow(match_img)
+    # plt.show()
 
 
 if __name__ == "__main__":
