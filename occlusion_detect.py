@@ -201,6 +201,7 @@ def occlusion_detect_with_gray(image, threshold=0.2, visulize=False):
     # img = cv.adaptiveThreshold(gray_img, 255 ,cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 11, 2)
     blur = cv.GaussianBlur(gray_img, (5, 5), 0)
     # make low region as foreground
+    # _, binary_img = cv.threshold(blur, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)
     _, binary_img = cv.threshold(blur, 0, 1, cv.THRESH_BINARY + cv.THRESH_OTSU)
 
     lcc, sum_lcc = get_largest_connect(binary_img)
