@@ -128,6 +128,7 @@ def match_keypoint_with_knn(features_a, features_b, ratio=0.7, match_type='bf', 
     elif match_type == 'flann':
         matcher = create_matcher_with_flann()
 
+        # flann need convert to float32
         features_a = features_a.astype(np.float32)
         features_b = features_b.astype(np.float32)
 

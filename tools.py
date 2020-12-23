@@ -16,6 +16,24 @@ import cv2 as cv
 import matplotlib.pyplot as plt
 
 
+def aspect_resize(image, size=256):
+
+    img_shape = image.shape
+
+
+    if img_shape[0] < img_shape[1]:
+        ratio = size / img_shape[0]
+
+    else:
+        ratio = size / img_shape[1]
+
+    new_size = tuple([int(img_shape[1] * ratio), int(img_shape[0] * ratio)])
+
+    new_img = cv.resize(image, new_size)
+
+    return new_img
+
+
 def show_histogram(image, title='hist'):
     """
 

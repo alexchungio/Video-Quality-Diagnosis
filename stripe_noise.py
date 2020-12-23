@@ -80,9 +80,9 @@ def main():
 
     bgr_img = cv.imread(img_path, flags=cv.IMREAD_COLOR)
     # gray_img = cv.cvtColor(bgr_img, code=cv.COLOR_BGR2GRAY)
-    gray_img = cv.cvtColor(bgr_img, code=cv.COLOR_BGR2HSV)
+    hsv_img = cv.cvtColor(bgr_img, code=cv.COLOR_BGR2HSV)
 
-    stripe_flag = detect_stripe_with_fft(gray_img[:, :, 0], visualize=True)
+    stripe_flag = detect_stripe_with_fft(hsv_img[:, :, 0], visualize=True)
     print(stripe_flag)
 
     print('Done')
