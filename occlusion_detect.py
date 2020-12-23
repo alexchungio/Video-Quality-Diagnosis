@@ -15,12 +15,13 @@ import cv2 as cv
 import numpy as np
 import matplotlib.pyplot as plt
 import pycocotools.mask as cocomask
+from skimage.measure import label
 
-# img_path = './images/occlusion/occlusion_1.jpg'
-img_path = './images/cat.jpg'
+img_path = './images/occlusion/occlusion_2.jpg'
+# img_path = './images/occlusion/occlusion_2.jpg'
 
 
-def caustics_detect(gray_img, k=1):
+def caustics_cdetect(gray_img, k=1):
     """
 
     :param image:
@@ -132,10 +133,7 @@ def get_leaf_area(image, visualize=False):
     # tree_mask = cv.morphologyEx(tree_mask, cv.MORPH_OPEN, kernel)
     # tree_mask = cv.morphologyEx(tree_mask, cv.MORPH_CLOSE, kernel, iterations=3)
     # tree_mask = cv.dilate(tree_mask, kernel=kernel, iterations=3)
-
-
     if visualize:
-
         tree_area = cv.bitwise_and(image, image, mask=tree_mask)
         plt.imshow(tree_area[:, :, ::-1])
         plt.axis('off')
@@ -144,15 +142,77 @@ def get_leaf_area(image, visualize=False):
     return tree_mask
 
 
-def occlusion_detect(image, threshold=0.2):
+def occlusion_detect_with_leaf(image, threshold=0.2, visualize=False):
 
     h, w, _ = image.shape
 
     tree_mask = get_leaf_area(image, visualize=True)
 
+    if visualize:
+        plt.imshow(tree_mask, cmap='gray')
+        plt.show()
+
     tree_rate = np.sum(tree_mask) / (h*w)
 
     return tree_rate > threshold
+
+
+def get_largest_connect(bw_img):
+    '''
+    compute largest Connect component of a binary image
+
+    Parameters:
+    ---
+
+    bw_img: ndarray
+        binary image
+
+	Returns:
+	---
+
+	lcc: ndarray
+		largest connect component.
+
+
+    '''
+    labeled_img, num = label(bw_img, neighbors=4, background=1, return_num=True)
+
+    max_label = 0
+    max_num = 0
+    # compute max connect
+    for i in range(1, num + 1):
+        if np.sum(labeled_img == i) > max_num:
+            max_num = np.sum(labeled_img == i)
+            max_label = i
+    lcc = (labeled_img == max_label)
+
+    return lcc, max_num
+
+
+def occlusion_detect_with_gray(image, threshold=0.2, visulize=False):
+    """
+
+    :param image:
+    :param threshold:
+    :return:
+    """
+    h, w, _ = image.shape
+    gray_img = cv.cvtColor(image, code=cv.COLOR_BGR2GRAY)
+    # img = cv.adaptiveThreshold(gray_img, 255 ,cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 11, 2)
+    blur = cv.GaussianBlur(gray_img, (5, 5), 0)
+    # make low region as foreground
+    _, binary_img = cv.threshold(blur, 0, 1, cv.THRESH_BINARY + cv.THRESH_OTSU)
+
+    lcc, sum_lcc = get_largest_connect(binary_img)
+
+    if visulize:
+        plt.imshow(lcc, cmap='gray')
+        plt.show()
+
+    low_rate = sum_lcc / (h * w)
+
+    return low_rate > threshold
+
 
 
 
@@ -160,9 +220,12 @@ def main():
 
 
     bgr_img = cv.imread(img_path, flags=cv.IMREAD_COLOR)
-
-    print(occlusion_detect(bgr_img))
-
+    bgr_img = cv.resize(bgr_img, (128, 128))
+    #
+    # print(occlusion_detect(bgr_img))
+    # is_occlusion_0 = occlusion_detect_with_leaf(bgr_img, visualize=True)
+    is_occlusion = occlusion_detect_with_gray(bgr_img, visulize=True)
+    print(is_occlusion)
     print('Done !')
 
 
