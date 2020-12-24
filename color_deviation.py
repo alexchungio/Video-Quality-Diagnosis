@@ -14,7 +14,7 @@ import cv2 as cv
 import numpy as np
 from tools import get_space_scale
 
-img_path = './images/cat.jpg'
+img_path = './images/demo_1.jpg'
 
 def tune_color(image, alpha=1.8, beta=1.0, gamma=1.0):
 
@@ -36,7 +36,7 @@ def tune_color(image, alpha=1.8, beta=1.0, gamma=1.0):
     return bgr_img
 
 
-def color_deviation(image, threshold = 1.5):
+def color_deviation(lab_img, threshold = 1.5):
     """
     true scale vs opencv scale:
     l => (0, 100) => (0, 255)
@@ -46,7 +46,7 @@ def color_deviation(image, threshold = 1.5):
     :param threshold:
     :return:
     """
-    lab_img = cv.cvtColor(image, code=cv.COLOR_BGR2Lab)
+    assert len(lab_img.shape) == 3
 
     lab_img = lab_img.astype(np.float32)
 
@@ -67,14 +67,18 @@ def color_deviation(image, threshold = 1.5):
     m = np.sqrt(m_a ** 2 + m_b ** 2)
 
     k = d / m
-
-    return k < threshold
+    print(k)
+    return k > threshold
 
 def main():
     image = cv.imread(img_path, flags=cv.IMREAD_COLOR)
     color_img = tune_color(image)
-    origin_k = color_deviation(image)
-    color_k = color_deviation(color_img)
+
+    origin_lab_img = cv.cvtColor(image, code=cv.COLOR_BGR2Lab)
+    color_lab_img = cv.cvtColor(color_img, code=cv.COLOR_BGR2Lab)
+    origin_k = color_deviation(origin_lab_img)
+    color_k = color_deviation(color_lab_img)
+    cv.imwrite('./images/color_deviation.jpg', color_img)
     # get_space_scale()
     print(origin_k)
     print(color_k)
