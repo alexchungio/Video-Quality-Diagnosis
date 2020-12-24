@@ -17,11 +17,11 @@ import matplotlib.pyplot as plt
 import pycocotools.mask as cocomask
 from skimage.measure import label
 
-# img_path = './images/occlusion/occlusion_0.jpg'
-img_path = './images/demo_1.jpg'
+img_path = './images/occlusion/occlusion_3.jpg'
+# img_path = './images/demo_1.jpg'
 
 
-def caustics_cdetect(gray_img, k=1):
+def caustics_detect(gray_img, k=1):
     """
 
     :param image:
@@ -109,10 +109,16 @@ def find_contour(image):
 
 
 
-def get_leaf_area(image, visualize=False):
+def get_leaf_area(hsv_img, visualize=False):
 
+    """
 
-    hsv_img = cv.cvtColor(image, code=cv.COLOR_RGB2HSV)
+    :param image:
+    :param visualize:
+    :return:
+    """
+    assert len(hsv_img.shape) == 3
+    # range of green in H channel
     low_threshold = (45, 45, 5)
     upper_threshold = (255, 255, 255)
 
@@ -134,6 +140,7 @@ def get_leaf_area(image, visualize=False):
     # tree_mask = cv.morphologyEx(tree_mask, cv.MORPH_CLOSE, kernel, iterations=3)
     # tree_mask = cv.dilate(tree_mask, kernel=kernel, iterations=3)
     if visualize:
+        image = cv.cvtColor(hsv_img, code=cv.COLOR_HSV2BGR)
         tree_area = cv.bitwise_and(image, image, mask=tree_mask)
         plt.imshow(tree_area[:, :, ::-1])
         plt.axis('off')
@@ -142,17 +149,18 @@ def get_leaf_area(image, visualize=False):
     return tree_mask
 
 
-def occlusion_detect_with_leaf(image, threshold=0.2, visualize=False):
+def occlusion_detect_with_leaf(hsv_img, threshold=0.2, visualize=False):
 
-    h, w, _ = image.shape
+    assert len(hsv_img.shape) == 3
+    h, w, _ = hsv_img.shape
 
-    tree_mask = get_leaf_area(image, visualize=True)
+    tree_mask = get_leaf_area(hsv_img, visualize=visualize)
 
     if visualize:
         plt.imshow(tree_mask, cmap='gray')
         plt.show()
 
-    tree_rate = np.sum(tree_mask) / (h*w)
+    tree_rate = np.sum(tree_mask) / (h * w)
 
     return tree_rate > threshold
 
@@ -189,15 +197,15 @@ def get_largest_connect(bw_img):
     return lcc, max_num
 
 
-def occlusion_detect_with_gray(image, threshold=0.2, visulize=False):
+def occlusion_detect_with_gray(gray_img, threshold=0.2, visulize=False):
     """
 
     :param image:
     :param threshold:
     :return:
     """
-    h, w, _ = image.shape
-    gray_img = cv.cvtColor(image, code=cv.COLOR_BGR2GRAY)
+    assert len(gray_img.shape) == 2
+    h, w = gray_img.shape
     # img = cv.adaptiveThreshold(gray_img, 255 ,cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 11, 2)
     blur = cv.GaussianBlur(gray_img, (5, 5), 0)
     # make low region as foreground
@@ -216,10 +224,11 @@ def occlusion_detect_with_gray(image, threshold=0.2, visulize=False):
     return low_rate > threshold
 
 
-def occlusion_detect(image, threshold_0=0.2, threshold_1=0.2, visualize=False):
+def occlusion_detect(gray_img, hsv_img, threshold_0=0.2, threshold_1=0.25, visualize=False):
 
-    leaf_occlusion = occlusion_detect_with_leaf(image, threshold_0, visualize)
-    gray_occlusion = occlusion_detect_with_gray(image, threshold_1, visualize)
+    gray_occlusion = occlusion_detect_with_gray(gray_img, threshold_0, visualize)
+
+    leaf_occlusion = occlusion_detect_with_leaf(hsv_img, threshold_1, visualize)
 
     return leaf_occlusion or gray_occlusion
 
@@ -230,10 +239,12 @@ def main():
 
     bgr_img = cv.imread(img_path, flags=cv.IMREAD_COLOR)
     bgr_img = cv.resize(bgr_img, (128, 128))
-    #
+
+    gray_img = cv.cvtColor(bgr_img, code=cv.COLOR_BGR2GRAY)
+    hsv_img = cv.cvtColor(bgr_img, code=cv.COLOR_BGR2HSV)
     # print(occlusion_detect(bgr_img))
     # is_occlusion_0 = occlusion_detect_with_leaf(bgr_img, visualize=True)
-    is_occlusion = occlusion_detect(bgr_img)
+    is_occlusion = occlusion_detect(hsv_img=hsv_img, gray_img=gray_img)
     print(is_occlusion)
     print('Done !')
 

@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 from snow_noise_detect import GeneratorNoise
 
 
-def detect_blur_noise(image, size=60, blur_thresh=20, noise_thresh=50, visulize=False):
+def detect_blur_noise(gray_img, size=60, blur_threshold=20, noise_threshold=50, visulize=False):
     """
 
     :param image:
@@ -26,16 +26,16 @@ def detect_blur_noise(image, size=60, blur_thresh=20, noise_thresh=50, visulize=
     :param vis:
     :return:
     """
-    assert len(image.shape) == 2, "Image format must be gray"
+    assert len(gray_img.shape) == 2, "Image format must be gray"
     # grab the dimensions of the image and use the dimensions to
     # derive the center (x, y)-coordinates
-    (h, w) = image.shape
+    (h, w) = gray_img.shape
     (center_x, center_y) = (int(w / 2.0), int(h / 2.0))
     # compute the FFT to find the frequency transform, then shift
 	# the zero frequency component (i.e., DC component located at
 	# the top-left corner) to the center where it will be more
 	# easy to analyze
-    fft = np.fft.fft2(image)
+    fft = np.fft.fft2(gray_img)
     fftShift = np.fft.fftshift(fft)
 
 
@@ -46,7 +46,7 @@ def detect_blur_noise(image, size=60, blur_thresh=20, noise_thresh=50, visulize=
 
         # display the original input image
         (fig, ax) = plt.subplots(1, 2, )
-        ax[0].imshow(image, cmap="gray")
+        ax[0].imshow(gray_img, cmap="gray")
         ax[0].set_title("Input")
         ax[0].set_xticks([])
         ax[0].set_yticks([])
@@ -76,9 +76,9 @@ def detect_blur_noise(image, size=60, blur_thresh=20, noise_thresh=50, visulize=
     # the image will be considered "blurry" if the mean value of the
     # magnitudes is less than the threshold value
 
-    blur_flag = mean < blur_thresh
-    noise_flag = mean > noise_thresh
-    print(mean)
+    blur_flag = mean < blur_threshold
+    noise_flag = mean > noise_threshold
+
     return blur_flag, noise_flag
 
 

@@ -17,7 +17,7 @@ import cv2 as cv
 from tools import visual_fft_magnitude
 
 
-def detect_blur_fft(image, size=60, thresh=10, vis=False):
+def detect_blur_fft(image, size=60, thresh=20, vis=False):
     """
 
     :param image:
@@ -132,7 +132,7 @@ def eval(gray_img, size=60, threshold=20, visual=False):
 
 
 def main():
-    img_path = './images/blur/blur_0.jpg'
+    img_path = './images/blur/blur_2.jpg'
     size = 60 # low frequencies size
     threshold = 20 # threshold for our blur detector to fire
     visual = True #b whether or not we are visualizing intermediary steps

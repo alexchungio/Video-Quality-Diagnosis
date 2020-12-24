@@ -67,7 +67,7 @@ def color_deviation(lab_img, threshold = 1.5):
     m = np.sqrt(m_a ** 2 + m_b ** 2)
 
     k = d / m
-    print(k)
+
     return k > threshold
 
 def main():

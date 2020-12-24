@@ -43,7 +43,7 @@ def video_jitter_detect(pre_img, cur_img, threshold=3, m=3):
     delta_row = cross_correlation(pre_p_row, cur_p_row, m=m)
     delta_col = cross_correlation(pre_p_col, cur_p_col, m=m)
 
-    print(delta_row, delta_col)
+    # print(delta_row, delta_col)
     is_jitter = abs(delta_row) >= threshold or abs(delta_col) >= threshold
 
     return is_jitter
@@ -133,7 +133,7 @@ def main():
     # delta_y = cross_correlation(p_col, p_col, m=2)
     # print(delta_y)
 
-    cap = cv.VideoCapture(stability_video_path)
+    cap = cv.VideoCapture(jitter_video_path)
 
     fps = cap.get(cv.CAP_PROP_FPS)
     wait_time = int(1000 / fps) # ms

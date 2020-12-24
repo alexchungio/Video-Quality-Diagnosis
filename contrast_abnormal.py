@@ -17,23 +17,34 @@ from tools import show_histogram
 img_path = './images/fog_1.jpg'
 
 
-def contrast(bgr_img, threshold=0.7, range=40):
+def contrast_detect(gray_img, threshold=0.7, range=40, gray_hist=None):
+    """
 
-    gray_img = cv.cvtColor(bgr_img, cv.COLOR_BGR2GRAY)
+    :param gray_img:
+    :param threshold:
+    :param range:
+    :param gray_hist:
+    :return:
+    """
 
+    assert len(gray_img.shape) == 2
     median_size = np.median(gray_img)
 
-    hist = cv.calcHist([gray_img], channels=[0], mask=None, histSize=[256],
-                       ranges=[0, 255]).flatten()
+    if gray_hist is not None:
+        hist = gray_hist.flatten()
+    else:
+        hist = cv.calcHist([gray_img], channels=[0], mask=None, histSize=[256],
+                           ranges=[0, 255]).flatten()
 
     low_threshold, high_threshold = np.clip((median_size-range, median_size+range), 0, 255).astype(np.int32)
 
     gather_pixel = hist[low_threshold:high_threshold]
 
     gather_rate = sum(gather_pixel) / sum(hist)
-    print(gather_rate)
+    # print(gather_rate)
 
     return gather_rate > threshold
+
 
 
 def low_contrast(src, fraction_threshold=0.5, lower_percentile=1,
@@ -108,7 +119,9 @@ def main():
     # show_histogram(bgr_img)
     # cv.imshow('raw image', bgr_img)
     # cv.waitKey(0)
-    contrast_flag = contrast(bgr_img)
+
+    gray_img = cv.cvtColor(bgr_img, cv.COLOR_BGR2GRAY)
+    contrast_flag = contrast_detect(gray_img)
     # contrast_flag = low_contrast(bgr_img)
     print(contrast_flag)
 

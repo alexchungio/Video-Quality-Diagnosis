@@ -51,7 +51,7 @@ def scene_detect(train_img, query_img, extractor_method='orb', match_type='flann
 
     matches = match_keypoint_with_knn(des_a, des_b, ratio=ratio, match_type=match_type, method=extractor_method)
 
-    print(len(matches))
+    # print(len(matches))
     return len(matches) < threshold
 
 

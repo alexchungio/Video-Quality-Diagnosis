@@ -19,11 +19,11 @@ import matplotlib.pyplot as plt
 from tools import visual_fft_magnitude
 
 
-img_path = './images/stripe/stripe_1.jpg'
+img_path = './images/stripe/stripe_0.jpg'
 # img_path = './images/demo.jpg'
 
 
-def detect_stripe_with_fft(image, size=30, threshold=10, visualize=False):
+def detect_stripe(hsv_img, size=40, threshold=60, visualize=False):
     """
 
     :param image:
@@ -33,13 +33,13 @@ def detect_stripe_with_fft(image, size=30, threshold=10, visualize=False):
     :return
     """
 
-    assert len(image.shape) == 2, "Image format must be gray"
+    assert len(hsv_img.shape) == 3, "Image format must be hsv"
 
-    h, w = image.shape
+    h, w, _ = hsv_img.shape
     (center_x, center_y) = (int(w / 2.0), int(h / 2.0))
 
     # fft
-    fft = np.fft.fft2(image)
+    fft = np.fft.fft2(hsv_img[:, :, 0])
     # centralize
     central_fft = np.fft.fftshift(fft)
     # real value
@@ -58,7 +58,7 @@ def detect_stripe_with_fft(image, size=30, threshold=10, visualize=False):
 
     if visualize:
         (fig, ax) = plt.subplots(1, 3, )
-        for i, (img, name) in enumerate(zip([image, abs_fft, mask_center_fft], ['input', 'center', 'center & mask'])):
+        for i, (img, name) in enumerate(zip([hsv_img[:, :, 0], abs_fft, mask_center_fft], ['input', 'center', 'center & mask'])):
             ax[i].imshow(img, cmap="gray")
             ax[i].set_title(name)
             ax[i].set_xticks([])
@@ -67,11 +67,10 @@ def detect_stripe_with_fft(image, size=30, threshold=10, visualize=False):
 
     # get number of highlight point
     grad_fft = cv.Laplacian(mask_center_fft, cv.CV_32F)
-    highlight_point = grad_fft > 4
+    highlight_point = grad_fft > 4.5
     num_highlight = np.sum(highlight_point)
 
     print(num_highlight)
-
     return num_highlight > threshold
 
 
@@ -82,7 +81,7 @@ def main():
     # gray_img = cv.cvtColor(bgr_img, code=cv.COLOR_BGR2GRAY)
     hsv_img = cv.cvtColor(bgr_img, code=cv.COLOR_BGR2HSV)
 
-    stripe_flag = detect_stripe_with_fft(hsv_img[:, :, 0], visualize=True)
+    stripe_flag = detect_stripe(hsv_img, threshold=100, visualize=True)
     print(stripe_flag)
 
     print('Done')

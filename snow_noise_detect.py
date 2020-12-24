@@ -71,7 +71,7 @@ class GeneratorNoise(object):
 
 
 
-def snow_noise_detect(image, center_rate=0.005, threshold=0.01, visual=False):
+def snow_noise_detect(image, size=30, threshold=0.01, visual=False):
     """
     detect high frequency percent
     :param image:
@@ -80,36 +80,39 @@ def snow_noise_detect(image, center_rate=0.005, threshold=0.01, visual=False):
     :return:
     """
     assert len(image.shape) == 2
-    rows, cols = image.shape
+    (h, w) = image.shape
+    (center_x, center_y) = (int(w / 2.0), int(h / 2.0))
     # gray_img = cv.imread(image, flags=cv.IMREAD_GRAYSCALE)
 
     fft = np.fft.fft2(image)
     # centralize
     central_f = np.fft.fftshift(fft)
+
     # real value
     # abs_f = np.abs(central_f)
     # # change scale
     # scale_f = np.log(1 + abs_f)
 
-    row_length = int(rows * center_rate)
-    col_length = int(cols * center_rate)
+    # row_length = int(rows * center_rate)
+    # col_length = int(cols * center_rate)
+    #
+    # row_low = int((rows - row_length) / 2)
+    # row_high = row_low + row_length
+    #
+    # col_low = int((cols - col_length) / 2)
+    # col_high = col_low + col_length
+    #
+    # mask = np.ones_like(image, dtype=np.float32)
+    #
+    # mask[row_low:row_high, :] = 0
+    # mask[:, col_low:col_high] = 0
 
-    row_low = int((rows - row_length) / 2)
-    row_high = row_low + row_length
-
-    col_low = int((cols - col_length) / 2)
-    col_high = col_low + col_length
-
-    mask = np.ones_like(image, dtype=np.float32)
-
-    mask[row_low:row_high, :] = 0
-    mask[:, col_low:col_high] = 0
-
-    fft_center = central_f * mask
+    central_f[center_y - size:center_y + size, center_x - size:center_x + size] = 0
+    # fft_center = central_f * mask
 
     # center_percent = np.sum(fft_center) / np.sum(scale_f)
     if visual:
-        scale_f = 20 * np.log(1 + abs(fft_center))
+        scale_f = 20 * np.log(1 + abs(central_f))
         cv.normalize(scale_f, scale_f, 0, 1, cv.NORM_MINMAX)
         scale_f *= 255.
         scale_f = scale_f.astype(np.uint8)
@@ -117,7 +120,7 @@ def snow_noise_detect(image, center_rate=0.005, threshold=0.01, visual=False):
         plt.imshow(scale_f, cmap='gray')
         plt.show()
 
-    fftShift = np.fft.ifftshift(fft_center)
+    fftShift = np.fft.ifftshift(central_f)
     recon = np.fft.ifft2(fftShift)
 
     # compute the magnitude spectrum of the reconstructed image,
@@ -131,7 +134,7 @@ def snow_noise_detect(image, center_rate=0.005, threshold=0.01, visual=False):
 
 
 def main():
-    img_path = './images/demo_1.jpg'
+    img_path = './images/demo.jpg'
     image = cv.imread(img_path, flags=cv.IMREAD_COLOR)
 
     gray_img = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
