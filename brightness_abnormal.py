@@ -17,7 +17,7 @@ import cv2 as cv
 import matplotlib.pyplot as plt
 from tools import show_histogram
 
-img_path = './images/demo.jpg'
+img_path = './images/demo_1.jpg'
 
 from enum import Enum
 
@@ -29,24 +29,21 @@ class Brightness(Enum):
     HIGH = 2
 
 
-def brightness(bgr_img, low_threshold=0.1, high_threshold=0.1):
+def brightness(gray_img, low_threshold=0.1, high_threshold=0.1):
 
-    flag = 0
 
-    gray_img = cv.cvtColor(bgr_img, cv.COLOR_BGR2GRAY)
-
+    assert len(gray_img.shape) == 2
     hist = cv.calcHist([gray_img], channels=[0], mask=None, histSize=[256],
                        ranges=[0, 255])
 
     low_rate = sum(hist[:20]) / sum(hist)
     high_rate = sum(hist[-20:]) / sum(hist)
 
-    if low_rate > low_threshold:
-        flag = Brightness.LOW.value
-    elif high_rate > high_threshold:
-        flag = Brightness.HIGH.value
+    low_flag =  low_rate[0] > low_threshold
+    high_flag = high_rate[0] > high_threshold
 
-    return flag
+
+    return low_flag, high_flag
 
 
 def tune_brightness_with_lab(bgr_img, beta=0):
@@ -110,12 +107,15 @@ def main():
 
     # show_histogram(bgr_img, 'raw')
     # show_histogram(brightness_img, title='brightness')
+    cv.imwrite('./images/hight_bright.jpg', high_brightness_img)
+    cv.imwrite('./images/low_bright.jpg', low_brightness_img)
 
-    normal_flag = brightness(bgr_img)
+    high_brightness_img = cv.cvtColor(high_brightness_img, cv.COLOR_BGR2GRAY)
+    low_brightness_img = cv.cvtColor(low_brightness_img, cv.COLOR_BGR2GRAY)
     high_flag = brightness(high_brightness_img)
     low_flag = brightness(low_brightness_img)
 
-    print(normal_flag)
+
     print(high_flag)
     print(low_flag)
 
