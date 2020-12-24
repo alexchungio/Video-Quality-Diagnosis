@@ -17,8 +17,8 @@ import matplotlib.pyplot as plt
 import pycocotools.mask as cocomask
 from skimage.measure import label
 
-img_path = './images/occlusion/occlusion_2.jpg'
-# img_path = './images/occlusion/occlusion_2.jpg'
+# img_path = './images/occlusion/occlusion_0.jpg'
+img_path = './images/demo_1.jpg'
 
 
 def caustics_cdetect(gray_img, k=1):
@@ -201,8 +201,9 @@ def occlusion_detect_with_gray(image, threshold=0.2, visulize=False):
     # img = cv.adaptiveThreshold(gray_img, 255 ,cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 11, 2)
     blur = cv.GaussianBlur(gray_img, (5, 5), 0)
     # make low region as foreground
-    # _, binary_img = cv.threshold(blur, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)
-    _, binary_img = cv.threshold(blur, 0, 1, cv.THRESH_BINARY + cv.THRESH_OTSU)
+    # _, otsu_binary_img = cv.threshold(blur, 0, 255, cv.THRESH_BINARY_INV + cv.THRESH_OTSU)
+
+    _, binary_img = cv.threshold(blur, 50, 1, cv.THRESH_BINARY)
 
     lcc, sum_lcc = get_largest_connect(binary_img)
 
@@ -215,6 +216,13 @@ def occlusion_detect_with_gray(image, threshold=0.2, visulize=False):
     return low_rate > threshold
 
 
+def occlusion_detect(image, threshold_0=0.2, threshold_1=0.2, visualize=False):
+
+    leaf_occlusion = occlusion_detect_with_leaf(image, threshold_0, visualize)
+    gray_occlusion = occlusion_detect_with_gray(image, threshold_1, visualize)
+
+    return leaf_occlusion or gray_occlusion
+
 
 
 def main():
@@ -225,7 +233,7 @@ def main():
     #
     # print(occlusion_detect(bgr_img))
     # is_occlusion_0 = occlusion_detect_with_leaf(bgr_img, visualize=True)
-    is_occlusion = occlusion_detect_with_gray(bgr_img, visulize=True)
+    is_occlusion = occlusion_detect(bgr_img)
     print(is_occlusion)
     print('Done !')
 
