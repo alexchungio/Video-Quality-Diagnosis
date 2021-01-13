@@ -29,23 +29,25 @@ class Brightness(Enum):
     HIGH = 2
 
 
-def brightness(gray_img, low_threshold=0.1, high_threshold=0.1, gray_hist = None):
+def brightness(gray_img, low_threshold=60, high_threshold=190, gray_hist = None):
 
 
     assert len(gray_img.shape) == 2
 
-    if gray_hist is not None:
-        hist = gray_hist
-    else:
-        hist = cv.calcHist([gray_img], channels=[0], mask=None, histSize=[256],
-                           ranges=[0, 255])
+    # if gray_hist is not None:
+    #     hist = gray_hist
+    # else:
+    #     hist = cv.calcHist([gray_img], channels=[0], mask=None, histSize=[256],
+    #                        ranges=[0, 255])
 
-    low_rate = sum(hist[:20]) / sum(hist)
-    high_rate = sum(hist[-20:]) / sum(hist)
 
-    low_flag =  low_rate[0] > low_threshold
-    high_flag = high_rate[0] > high_threshold
 
+    # low_rate = sum(hist[:20]) / sum(hist)
+    # high_rate = sum(hist[-20:]) / sum(hist)
+    #
+    gray_mean = gray_img.mean()
+    low_flag =  gray_mean < low_threshold
+    high_flag = gray_mean > high_threshold
 
     return low_flag, high_flag
 

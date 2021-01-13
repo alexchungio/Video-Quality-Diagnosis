@@ -21,9 +21,11 @@ from joint_detect_blur_noise import detect_blur_noise
 from color_deviation import color_deviation
 from frozen_detect import frozen_detect
 from gray_judge import gray_judge
+from signal_lost_detect import lost_signal
 from occlusion_detect import occlusion_detect
 from contrast_abnormal import contrast_detect
 from stripe_noise import detect_stripe
+from tqdm import tqdm
 
 
 from tools import aspect_resize
@@ -94,7 +96,7 @@ class VideoProperty(object):
 
 
 class ImageProperty(object):
-    def __init__(self, low_brightness_threshold=0.1, high_brightness_threshold=0.1, contrast_threshold=0.7,
+    def __init__(self, low_brightness_threshold=60, high_brightness_threshold=190, contrast_threshold=0.7,
                  gray_threshold=0.87, color_deviation_threshold=1.5, blur_threshold=20, noise_threshold=50,
                  occlusion_threshold_0=0.2, occlusion_threshold_1=0.25, strip_threshold=150):
         self.gray_threshold = gray_threshold
@@ -127,14 +129,21 @@ class ImageProperty(object):
         video_quality['contrast'] = contrast_detect(gray_img, threshold=self.contrast_threshold, gray_hist=gray_hist)
         video_quality['color_deviation'] = color_deviation(lab_img, threshold=self.color_deviation_threshold)
 
-        video_quality['blur'], video_quality['noise'] = detect_blur_noise(gray_img,
-                                                  blur_threshold=self.blur_threshold,
-                                                  noise_threshold=self.noise_threshold)
-
-        video_quality['occlusion'] = occlusion_detect(gray_img, hsv_img,
-                                          threshold_0=self.occlusion_threshold_0,
-                                          threshold_1=self.occlusion_threshold_1)
-        video_quality['strip'] = detect_stripe(hsv_img, threshold=self.strip_threshold)
+        video_quality['blur'], _= detect_blur_noise(gray_img,
+                                                    blur_threshold=self.blur_threshold,
+                                                    noise_threshold=self.noise_threshold)
+        video_quality['lost'] = lost_signal(image)
+        if video_quality['lost']:
+            video_quality['contrast'] = False
+            video_quality['blur'] = False
+            video_quality['color_deviation'] = False
+            video_quality['low_brightness'] = False
+            video_quality['high_brightness'] = False
+            video_quality['gray'] = False
+        # video_quality['occlusion'] = occlusion_detect(gray_img, hsv_img,
+        #                                   threshold_0=self.occlusion_threshold_0,
+        #                                   threshold_1=self.occlusion_threshold_1)
+        # video_quality['strip'] = detect_stripe(hsv_img, threshold=self.strip_threshold)
 
 
         return video_quality
@@ -145,28 +154,49 @@ def main():
     image_property = ImageProperty()
 
     cap = cv.VideoCapture(scene_video_path)
-    #
+
+    start = time.time()
     video_quality = video_property(cap)
+    print(video_quality)
+    end = time.time()
+    print(end-start)
 
     image = cv.imread(color_image_path, flags=cv.IMREAD_COLOR)
     image = aspect_resize(image)
 
     print(video_quality)
 
-    # dataset = os.path.join('/media/alex/80CA308ECA308288/picture', 'dataset_1')
-    #
-    # image_name = os.listdir(dataset)
-    #
-    # for img_name in image_name[:15]:
-    #
-    #     print(img_name)
-    #     img_path = os.path.join(dataset, img_name)
-    #     image = cv.imread(img_path, flags=cv.IMREAD_COLOR)
-    #     image = aspect_resize(image)
-    #
-    #     print(image_property(image))
+    dataset = os.path.join('/media/alex/80CA308ECA308288/picture', 'dataset_1')
+
+    image_name = os.listdir(dataset)
+
+    for img_name in image_name[:15]:
+
+        print(img_name)
+        img_path = os.path.join(dataset, img_name)
+        image = cv.imread(img_path, flags=cv.IMREAD_COLOR)
+        image = aspect_resize(image)
+        start = time.time()
+        image_property(image)
+        end = time.time()
+        print(end - start)
 
 
+    # root_dataset = os.path.join('/media/alex/80CA308ECA308288/picture')
+    # dataset_0 = os.path.join(root_dataset, 'dataset_1')
+    #
+    # img_names = os.listdir(dataset_0)
+    #
+    # label_0 = os.path.join(root_dataset, 'cv_label_1.csv')
+    #
+    # with open(label_0, 'w') as fw:
+    #     for img_name in tqdm(img_names):
+    #         brg_img = cv.imread(os.path.join(dataset_0, img_name))
+    #         brg_img = aspect_resize(brg_img)
+    #         tags = image_property(brg_img)
+    #         tag_list = [name for name, tag in tags.items() if tag == True]
+    #         info = '{},{}\n'.format(img_name, ' '.join(tag_list))
+    #         fw.write(info)
 
 if __name__ == "__main__":
     main()
