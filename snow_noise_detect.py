@@ -56,6 +56,27 @@ class GeneratorNoise(object):
 
         return noise_img
 
+    def snow_noise(self, image, rate=0.05):
+        """
+
+        :param image:
+        :param rate:
+        :return:
+        """
+        noise_img = np.zeros_like(image, dtype=np.uint8)
+
+        for i in range(image.shape[0]):
+            for j in range(image.shape[1]):
+                randn = np.random.random()
+                # salt mode
+                if randn < rate:
+                    noise_img[i, j, :] = 255
+                else:
+                    noise_img[i, j, :] = image[i, j, :]
+
+        return noise_img
+
+
     def poisson_noise(self, image):
         vals = len(np.unique(image))
         vals = 2 ** np.ceil(np.log2(vals))
@@ -71,7 +92,7 @@ class GeneratorNoise(object):
 
 
 
-def snow_noise_detect(image, size=30, threshold=0.01, visual=False):
+def snow_noise_detect(image, center_rate=0.1, threshold=0.5, visual=False):
     """
     detect high frequency percent
     :param image:
@@ -81,52 +102,67 @@ def snow_noise_detect(image, size=30, threshold=0.01, visual=False):
     """
     assert len(image.shape) == 2
     (h, w) = image.shape
-    (center_x, center_y) = (int(w / 2.0), int(h / 2.0))
+    center_x, center_y = int(w / 2.0), int(h / 2.0)
     # gray_img = cv.imread(image, flags=cv.IMREAD_GRAYSCALE)
 
     fft = np.fft.fft2(image)
     # centralize
-    central_f = np.fft.fftshift(fft)
+    fftShift = np.fft.fftshift(fft)
 
     # real value
     # abs_f = np.abs(central_f)
     # # change scale
     # scale_f = np.log(1 + abs_f)
 
-    # row_length = int(rows * center_rate)
-    # col_length = int(cols * center_rate)
-    #
-    # row_low = int((rows - row_length) / 2)
-    # row_high = row_low + row_length
-    #
-    # col_low = int((cols - col_length) / 2)
-    # col_high = col_low + col_length
-    #
-    # mask = np.ones_like(image, dtype=np.float32)
-    #
-    # mask[row_low:row_high, :] = 0
-    # mask[:, col_low:col_high] = 0
+    row_length = int(h * center_rate)
+    col_length = int(w * center_rate)
 
-    central_f[center_y - size:center_y + size, center_x - size:center_x + size] = 0
-    # fft_center = central_f * mask
+
+    mask = np.zeros_like(image, dtype=np.float32)
+    mask[center_y - row_length:center_y + row_length, center_x - col_length:center_x + col_length] = 1
+
+    # central_f[center_y - size:center_y + size, center_x - size:center_x + size] = 0
+    fftShift = fftShift * mask
+
+    ifftShift = np.fft.ifftshift(fftShift)
+    recon = np.fft.ifft2(ifftShift)
 
     # center_percent = np.sum(fft_center) / np.sum(scale_f)
     if visual:
-        scale_f = 20 * np.log(1 + abs(central_f))
-        cv.normalize(scale_f, scale_f, 0, 1, cv.NORM_MINMAX)
-        scale_f *= 255.
-        scale_f = scale_f.astype(np.uint8)
+        # compute the magnitude spectrum of the transform
+        mag_spectrum = 20 * np.log(np.abs(fftShift))
 
-        plt.imshow(scale_f, cmap='gray')
+        filter_img = (np.abs(recon))
+        # display the original input image
+        (fig, ax) = plt.subplots(1, 3, )
+        ax[0].imshow(image, cmap="gray")
+        ax[0].set_title("Input")
+        ax[0].set_xticks([])
+        ax[0].set_yticks([])
+
+        # display the magnitude image
+        ax[1].imshow(mag_spectrum, cmap="gray")
+        ax[1].set_title("Magnitude Spectrum")
+        ax[1].set_xticks([])
+        ax[1].set_yticks([])
+
+        ax[2].imshow(filter_img, cmap="gray")
+        ax[2].set_title("Filter Image")
+        ax[2].set_xticks([])
+        ax[2].set_yticks([])
+
+        # show our plots
         plt.show()
 
-    fftShift = np.fft.ifftshift(central_f)
-    recon = np.fft.ifft2(fftShift)
 
     # compute the magnitude spectrum of the reconstructed image,
     # then compute the mean of the magnitude values
-    magnitude = 20 * np.log(np.abs(recon))
-    mean = np.mean(magnitude)
+    filter_img = np.abs(recon).astype(np.uint8)
+
+    plt.imshow(filter_img, cmap='gray')
+    plt.show()
+
+    mean = np.mean(image - filter_img) / 255
 
     print(mean)
 
@@ -140,8 +176,9 @@ def main():
     gray_img = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
     generator_noise = GeneratorNoise()
 
-    sp_img = generator_noise.salt_pepper_noise(image, rate=0.1)
-    gray_sp = cv.cvtColor(sp_img, cv.COLOR_BGR2GRAY)
+    snow_img = generator_noise.snow_noise(image, rate=0.2)
+    snow_gray_img = cv.cvtColor(snow_img, cv.COLOR_BGR2GRAY)
+
     # visual_fft_magnitude(gray_img)
     # visual_fft_magnitude(gray_sp)
     # cv.imshow('gauss image', gauss_img)
@@ -151,7 +188,7 @@ def main():
     # print(noise_detect(gray_sp, center_rate=center_rate) / noise_detect(gray_img, center_rate=center_rate))
 
     print(snow_noise_detect(gray_img, visual=True))
-    print(snow_noise_detect(gray_sp, visual=True))
+    print(snow_noise_detect(snow_gray_img, visual=True))
 
 
 if __name__ == "__main__":

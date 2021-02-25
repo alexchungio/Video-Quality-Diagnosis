@@ -43,8 +43,9 @@ def detect_blur_fft(image, size=60, thresh=20, vis=False):
     # component once again becomes the top-left, and then apply
     # the inverse FFT
     fftShift[center_y - size:center_y + size, center_x - size:center_x + size] = 0
-    fftShift = np.fft.ifftshift(fftShift)
-    recon = np.fft.ifft2(fftShift)
+
+    ifftShift = np.fft.ifftshift(fftShift)
+    recon = np.fft.ifft2(ifftShift)
 
     # compute the magnitude spectrum of the reconstructed image,
     # then compute the mean of the magnitude values
@@ -121,7 +122,7 @@ def eval(gray_img, size=60, threshold=20, visual=False):
             image = cv.GaussianBlur(image, (radius, radius), 0)
 
             # apply our blur detector using the FFT
-            (mean, blurry) = detect_blur_fft(image, size=60,
+            (mean, blurry) = detect_blur_fft(image, size=size,
                                              thresh=threshold, vis=visual)
 
             # draw on the image, indicating whether or not it is
