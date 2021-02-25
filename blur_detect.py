@@ -38,27 +38,6 @@ def detect_blur_fft(image, size=60, thresh=20, vis=False):
     fft = np.fft.fft2(image)
     fftShift = np.fft.fftshift(fft)
 
-    # check to see if we are visualizing our output
-    if vis:
-        # compute the magnitude spectrum of the transform
-        magnitude = 20 * np.log(np.abs(fftShift))
-
-        # display the original input image
-        (fig, ax) = plt.subplots(1, 2, )
-        ax[0].imshow(image, cmap="gray")
-        ax[0].set_title("Input")
-        ax[0].set_xticks([])
-        ax[0].set_yticks([])
-
-        # display the magnitude image
-        ax[1].imshow(magnitude, cmap="gray")
-        ax[1].set_title("Magnitude Spectrum")
-        ax[1].set_xticks([])
-        ax[1].set_yticks([])
-
-        # show our plots
-        plt.show()
-
     # zero-out the center of the FFT shift (i.e., remove low
     # frequencies), apply the inverse shift such that the DC
     # component once again becomes the top-left, and then apply
@@ -69,7 +48,37 @@ def detect_blur_fft(image, size=60, thresh=20, vis=False):
 
     # compute the magnitude spectrum of the reconstructed image,
     # then compute the mean of the magnitude values
+    # plt.imshow(np.abs(recon))
+    # plt.show()
     magnitude = 20 * np.log(np.abs(recon))
+
+    # check to see if we are visualizing our output
+    if vis:
+        # compute the magnitude spectrum of the transform
+        mag_spectrum= 20 * np.log(np.abs(fftShift))
+
+        filter_img = (np.abs(recon))
+        # display the original input image
+        (fig, ax) = plt.subplots(1, 3, )
+        ax[0].imshow(image, cmap="gray")
+        ax[0].set_title("Input")
+        ax[0].set_xticks([])
+        ax[0].set_yticks([])
+
+        # display the magnitude image
+        ax[1].imshow(mag_spectrum, cmap="gray")
+        ax[1].set_title("Magnitude Spectrum")
+        ax[1].set_xticks([])
+        ax[1].set_yticks([])
+
+        ax[2].imshow(filter_img, cmap="gray")
+        ax[2].set_title("Filter Image")
+        ax[2].set_xticks([])
+        ax[2].set_yticks([])
+
+        # show our plots
+        plt.show()
+
     mean = np.mean(magnitude)
 
     # the image will be considered "blurry" if the mean value of the
@@ -91,10 +100,10 @@ def test(gray_img, size=60, threshold=20, visual=False):
                color, 2)
     print("[INFO] {}".format(text))
     # show the output image
-    cv.imshow("Output", image)
-    cv.waitKey(0)
-
-    cv.destroyAllWindows()
+    # cv.imshow("Output", image)
+    # cv.waitKey(0)
+    #
+    # cv.destroyAllWindows()
 
 def eval(gray_img, size=60, threshold=20, visual=False):
 
