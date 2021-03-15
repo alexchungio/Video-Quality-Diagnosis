@@ -17,12 +17,12 @@ import cv2 as cv
 from tools import visual_fft_magnitude
 
 
-def detect_blur_fft(image, size=60, thresh=20, vis=False):
+def detect_blur_fft(image, size=60, threshold=20, vis=False):
     """
 
     :param image:
     :param size:
-    :param thresh:
+    :param threshold:
     :param vis:
     :return:
     """
@@ -84,13 +84,13 @@ def detect_blur_fft(image, size=60, thresh=20, vis=False):
 
     # the image will be considered "blurry" if the mean value of the
     # magnitudes is less than the threshold value
-    return (mean, mean <= thresh)
+    return (mean, mean <= threshold)
 
 
 def test(gray_img, size=60, threshold=20, visual=False):
     # apply our blur detector using the FFT
     (mean, blurry) = detect_blur_fft(gray_img, size=size,
-                                     thresh=threshold, vis=visual)
+                                     threshold=threshold, vis=visual)
 
     # draw on the image, indicating whether or not it is blurry
     image = np.dstack([gray_img] * 3)

@@ -117,7 +117,6 @@ def snow_noise_detect(image, center_rate=0.1, threshold=0.5, visual=False):
     row_length = int(h * center_rate)
     col_length = int(w * center_rate)
 
-
     mask = np.zeros_like(image, dtype=np.float32)
     mask[center_y - row_length:center_y + row_length, center_x - col_length:center_x + col_length] = 1
 
@@ -154,17 +153,11 @@ def snow_noise_detect(image, center_rate=0.1, threshold=0.5, visual=False):
         # show our plots
         plt.show()
 
-
     # compute the magnitude spectrum of the reconstructed image,
     # then compute the mean of the magnitude values
     filter_img = np.abs(recon).astype(np.uint8)
 
-    plt.imshow(filter_img, cmap='gray')
-    plt.show()
-
     mean = np.mean(image - filter_img) / 255
-
-    print(mean)
 
     return mean > threshold
 

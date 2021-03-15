@@ -17,7 +17,8 @@ import cv2 as cv
 from jitter_detect import video_jitter_detect
 from scene_change_detect import scene_detect
 from brightness_abnormal import brightness
-from joint_detect_blur_noise import detect_blur_noise
+from blur_detect import detect_blur_fft
+from snow_noise_detect import snow_noise_detect
 from color_deviation import color_deviation
 from frozen_detect import frozen_detect
 from gray_judge import gray_judge
@@ -97,7 +98,7 @@ class VideoProperty(object):
 
 class ImageProperty(object):
     def __init__(self, low_brightness_threshold=60, high_brightness_threshold=190, contrast_threshold=0.7,
-                 gray_threshold=0.87, color_deviation_threshold=1.5, blur_threshold=20, noise_threshold=50,
+                 gray_threshold=0.87, color_deviation_threshold=1.5, blur_threshold=20, noise_threshold=0.5,
                  occlusion_threshold_0=0.2, occlusion_threshold_1=0.25, strip_threshold=150):
         self.gray_threshold = gray_threshold
         self.low_brightness_threshold = low_brightness_threshold
@@ -129,9 +130,10 @@ class ImageProperty(object):
         video_quality['contrast'] = contrast_detect(gray_img, threshold=self.contrast_threshold, gray_hist=gray_hist)
         video_quality['color_deviation'] = color_deviation(lab_img, threshold=self.color_deviation_threshold)
 
-        video_quality['blur'], _= detect_blur_noise(gray_img,
-                                                    blur_threshold=self.blur_threshold,
-                                                    noise_threshold=self.noise_threshold)
+        _, video_quality['blur'] = detect_blur_fft(gray_img,
+                                                  threshold=self.blur_threshold)
+        video_quality['noise'] = snow_noise_detect(gray_img,
+                                                   threshold=self.noise_threshold)
         video_quality['lost'] = lost_signal(image)
         if video_quality['lost']:
             video_quality['contrast'] = False
@@ -144,7 +146,6 @@ class ImageProperty(object):
         #                                   threshold_0=self.occlusion_threshold_0,
         #                                   threshold_1=self.occlusion_threshold_1)
         # video_quality['strip'] = detect_stripe(hsv_img, threshold=self.strip_threshold)
-
 
         return video_quality
 
